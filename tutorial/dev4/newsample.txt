@@ -1,0 +1,4 @@
+cd /home/devXX/hackathon/
+gitpull
+ gitpush "[5.6] 新規ファイル追加
+ 
