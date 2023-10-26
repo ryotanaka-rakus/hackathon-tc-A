@@ -24,8 +24,7 @@ onMounted(() => {
 // #region browser event handler
 // 投稿メッセージをサーバに送信する
 const onPublish = () => {
-    socket.emit("publishEvent", chatContent.value)
-    console.log(userName)
+    socket.emit("publishEvent", userName.value + "さん：" + chatContent.value)
 
   // 入力欄を初期化
   chatContent.value = ""
@@ -40,7 +39,7 @@ const onExit = () => {
 // メモを画面上に表示する
 const onMemo = () => {
   // メモの内容を表示
-  chatList.push(chatContent.value)
+  chatList.push(userName.value + "さんのメモ：" + chatContent.value)
 
   // 入力欄を初期化
   chatContent.value = ""
