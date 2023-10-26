@@ -29,7 +29,6 @@ const onPublish = () => {
 
   // 入力欄を初期化
   chatContent.value = ""
-
 }
 
 // 退室メッセージをサーバに送信する
@@ -40,28 +39,31 @@ const onExit = () => {
 // メモを画面上に表示する
 const onMemo = () => {
   // メモの内容を表示
+
   chatList.push(chatContent.value)
 
   // 入力欄を初期化
   chatContent.value = ""
-
 }
 // #endregion
 
 // #region socket event handler
 // サーバから受信した入室メッセージ画面上に表示する
 const onReceiveEnter = (data) => {
-  chatList.push()
+  chatList.push(data)
+  messages.unshift(data)
 }
 
 // サーバから受信した退室メッセージを受け取り画面上に表示する
 const onReceiveExit = (data) => {
-  chatList.push()
+  chatList.push(data)
+  messages.unshift(data)
 }
 
 // サーバから受信した投稿メッセージを画面上に表示する
 const onReceivePublish = (data) => {
-  chatList.push()
+  chatList.push(data)
+  messages.unshift(data)
 }
 // #endregion
 
