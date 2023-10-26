@@ -1,17 +1,17 @@
 import { createRouter, createWebHistory } from "vue-router"
-import Home from "../components/Home.vue"
-import Hello from "../components/Hello.vue"
+import Login                              from "../components/Login.vue"
+import ChatRoom                           from "../components/ChatRoom.vue"
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
       path: "/",
-      component: Home,
+      component: Login,
     },
     {
-      path: "/rakus",
-      component: Hello,
+      path: "/chatroom",
+      component: ChatRoom,
     }
   ],
 })

@@ -10,7 +10,7 @@ const onClick = () => {
   このメッセージはすべてのクライアントに送信されます。
   `)
   // メッセージ入力イベント（sendMessageEvent）を送信する
-
+  socket.emit("sendMessageEvent", message)
 }
 
 onMounted(() => {
@@ -39,7 +39,7 @@ onMounted(() => {
 
 
 <template>
-  <h1>Sample7</h1>
+  <h1>Vue.js Chat サンプル</h1>
   <button type="button" @click="onClick">メッセージを入力する</button>
   <ul>
     <li v-for="(message, index) in messages" :key="index">{{ message }}</li>
