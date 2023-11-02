@@ -96,7 +96,7 @@ const registerSocketEvent = () => {
         <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
       </div>
       <div class="mt-5" v-if="chatList.length !== 0">
-        <ul>
+        <ul class="reverse-order">
           <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">{{ chat }}</li>
         </ul>
       </div>
@@ -129,5 +129,10 @@ const registerSocketEvent = () => {
 .button-exit {
   color: #000;
   margin-top: 8px;
+}
+
+.reverse-order {
+  display: flex;
+  flex-direction: column-reverse;
 }
 </style>
