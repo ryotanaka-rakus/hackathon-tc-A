@@ -24,8 +24,7 @@ onMounted(() => {
 // #region browser event handler
 // 投稿メッセージをサーバに送信する
 const onPublish = () => {
-    socket.emit("publishEvent", chatContent.value)
-    console.log(userName)
+    socket.emit("publishEvent", userName.value + "さん：" + chatContent.value)
 
   // 入力欄を初期化
   chatContent.value = ""
@@ -39,8 +38,7 @@ const onExit = () => {
 // メモを画面上に表示する
 const onMemo = () => {
   // メモの内容を表示
-
-  chatList.push(chatContent.value)
+  chatList.push(userName.value + "さんのメモ：" + chatContent.value)
 
   // 入力欄を初期化
   chatContent.value = ""
@@ -99,7 +97,7 @@ const registerSocketEvent = () => {
         <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
       </div>
       <div class="mt-5" v-if="chatList.length !== 0">
-        <ul>
+        <ul class="reverse-order">
           <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">{{ chat }}</li>
         </ul>
       </div>
@@ -132,5 +130,10 @@ const registerSocketEvent = () => {
 .button-exit {
   color: #000;
   margin-top: 8px;
+}
+
+.reverse-order {
+  display: flex;
+  flex-direction: column-reverse;
 }
 </style>
