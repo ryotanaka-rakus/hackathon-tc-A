@@ -32,13 +32,13 @@ const onPublish = () => {
 
 // 退室メッセージをサーバに送信する
 const onExit = () => {
-
+  socket.emit("exitEvent", userName.value + "さんが退室しました")
 }
 
 // メモを画面上に表示する
 const onMemo = () => {
   // メモの内容を表示
-  chatList.push(userName.value + "さんのメモ：" + chatContent.value)
+  chatList.unshift(userName.value + "さんのメモ：" + chatContent.value)
 
   // 入力欄を初期化
   chatContent.value = ""
@@ -48,20 +48,17 @@ const onMemo = () => {
 // #region socket event handler
 // サーバから受信した入室メッセージ画面上に表示する
 const onReceiveEnter = (data) => {
-  chatList.push(data)
-  messages.unshift(data)
+  chatList.unshift(data)
 }
 
 // サーバから受信した退室メッセージを受け取り画面上に表示する
 const onReceiveExit = (data) => {
-  chatList.push(data)
-  messages.unshift(data)
+  chatList.unshift(data)
 }
 
 // サーバから受信した投稿メッセージを画面上に表示する
 const onReceivePublish = (data) => {
-  chatList.push(data)
-  messages.unshift(data)
+  chatList.unshift(data)
 }
 // #endregion
 
@@ -70,17 +67,17 @@ const onReceivePublish = (data) => {
 const registerSocketEvent = () => {
   // 入室イベントを受け取ったら実行
   socket.on("enterEvent", (data) => {
-
+    chatList.unshift(data)
   })
 
   // 退室イベントを受け取ったら実行
   socket.on("exitEvent", (data) => {
-
+    chatList.unshift(data)
   })
 
   // 投稿イベントを受け取ったら実行
   socket.on("publishEvent", (data) => {
-    chatList.push(data)
+    chatList.unshift(data)
   })
 }
 // #endregion
@@ -97,7 +94,7 @@ const registerSocketEvent = () => {
         <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
       </div>
       <div class="mt-5" v-if="chatList.length !== 0">
-        <ul class="reverse-order">
+        <ul>
           <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">{{ chat }}</li>
         </ul>
       </div>
@@ -132,8 +129,4 @@ const registerSocketEvent = () => {
   margin-top: 8px;
 }
 
-.reverse-order {
-  display: flex;
-  flex-direction: column-reverse;
-}
 </style>
