@@ -19,6 +19,24 @@
 
    例：`http://127.0.0.1:3000/`
 
+3. データベースの使い方
+  - データを見る
+  ```bash
+  $ npx prisma studio
+  ```
+
+  - マイグレーションする
+  ```bash
+  $ npx prisma migrate dev --name <migration_name> # マイグレーションファイルを作成
+  $ npx prisma migrate deploy # マイグレーションを適用
+  $ npx prisma migrate status # マイグレーションの履歴と状態の確認
+  ```
+
+  - シードデータを入れる
+  ```bash
+  $ npm run seed
+  ```
+
 ## 機能
 
 ### 基本要件

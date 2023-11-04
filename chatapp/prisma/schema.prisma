@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int            @id @default(autoincrement())
+  name     String
+  password String
+  rooms    UsersRooms[]
+  messages Message[]
+  replies  MessageReply[]
+}
+
+model UsersRooms {
+  id     Int    @id @default(autoincrement())
+  userId Int
+  roomId Int
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room   Room   @relation(fields: [roomId], references: [id])
+}
+
+model Room {
+  id               Int           @id @default(autoincrement())
+  name             String
+  is_direct_message Int
+  usersRooms       UsersRooms[]
+  messages         Message[]
+}
+
+model Message {
+  id            Int                   @id @default(autoincrement())
+  roomId        Int
+  senderId      Int
+  content       String
+  createdAt     DateTime              @default(now())
+  room          Room                  @relation(fields: [roomId], references: [id])
+  sender        User                  @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  editHistories MessageEditHistory[]
+  replies       MessageReply[]
+}
+
+model MessageEditHistory {
+  id              Int      @id @default(autoincrement())
+  messageId       Int
+  previousContent String
+  createdAt       DateTime @default(now())
+  message         Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+}
+
+model MessageReply {
+  id            Int                      @id @default(autoincrement())
+  messageId     Int
+  senderId      Int
+  content       String
+  createdAt     DateTime                 @default(now())
+  message       Message                  @relation(fields: [messageId], references: [id])
+  sender        User                     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  editHistories MessageReplyEditHistory[]
+}
+
+model MessageReplyEditHistory {
+  id              Int           @id @default(autoincrement())
+  messageReplyId  Int
+  previousContent String
+  createdAt       DateTime      @default(now())
+  messageReply    MessageReply  @relation(fields: [messageReplyId], references: [id], onDelete: Cascade)
+}
