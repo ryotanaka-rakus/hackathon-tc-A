@@ -18,6 +18,22 @@ async function saveMessage(content, userId, roomId) {
   }
 }
 
+// ユーザー一覧を取得する関数
+async function getUsers() {
+  try {
+    return await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        // パスワードなど、クライアントに送信すべきではない情報は含めない
+      }
+    });
+  } catch (error) {
+    console.error('Error getting users:', error);
+    throw new Error('Getting users failed');
+  }
+}
+
 export default (io, socket) => {
   // 入室メッセージをクライアントに送信する
   socket.on("enterEvent", (data) => {
@@ -46,4 +62,18 @@ export default (io, socket) => {
       socket.emit("errorEvent", "メッセージの保存に失敗しました。");
     }
   })
+
+  // ユーザー一覧のイベントハンドラ
+  socket.on("getUsersEvent", async () => {
+    try {
+      const users = await getUsers();
+      console.log(users)
+
+      // ユーザー一覧をリクエストしたクライアントに送信する
+      socket.emit("usersListEvent", users);
+    } catch (error) {
+      // エラーメッセージを送信者にのみ送信する
+      socket.emit("errorEvent", "ユーザー情報の取得に失敗しました。");
+    }
+  });
 }

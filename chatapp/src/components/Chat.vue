@@ -11,16 +11,23 @@ const roomId = 1
 
 // #region local variable
 const socket = socketManager.getInstance()
+
+// ユーザー一覧をサーバーから取得する
+const fetchUsers = () => {
+  socket.emit("getUsersEvent"); // サーバにユーザー一覧を要求する
+}
 // #endregion
 
 // #region reactive variable
 const chatContent = ref("")
 const chatList = reactive([])
+const userList = reactive([]) // ユーザー一覧を格納するためのリアクティブな配列
 // #endregion
 
 // #region lifecycle
 onMounted(() => {
   registerSocketEvent()
+  fetchUsers() // コンポーネントがマウントされたらユーザー一覧を取得する
 })
 // #endregion
 
@@ -97,6 +104,11 @@ const registerSocketEvent = () => {
 
   // エラーイベントを受け取ったら実行
   socket.on("errorEvent", onReceiveError);
+
+  // ユーザー一覧イベントを受け取ったら実行
+  socket.on("usersListEvent", (users) => {
+    userList.splice(0, userList.length, ...users) // 受け取ったユーザー一覧で更新
+  })
 }
 // #endregion
 </script>
@@ -113,7 +125,9 @@ const registerSocketEvent = () => {
       </div>
       <div class="mt-5" v-if="chatList.length !== 0">
         <ul>
-          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">{{ chat }}</li>
+          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">
+            {{ userList.filter((user) => user.id == chat.senderId)[0].name + "さん: " + chat.content }}
+          </li>
         </ul>
       </div>
     </div>
