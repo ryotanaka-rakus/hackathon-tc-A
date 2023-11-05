@@ -4,6 +4,9 @@ import socketManager from '../socketManager.js'
 
 // #region global state
 const userName = inject("userName")
+// 仮のuserId, roomId。Login.vueから渡す必要がある。
+const userId = 1
+const roomId = 1
 // #endregion
 
 // #region local variable
@@ -24,7 +27,12 @@ onMounted(() => {
 // #region browser event handler
 // 投稿メッセージをサーバに送信する
 const onPublish = () => {
-    socket.emit("publishEvent", userName.value + "さん：" + chatContent.value)
+  const messageData = {
+    messageContent: chatContent.value,
+    userId: userId,
+    roomId: roomId,
+  }
+  socket.emit("publishEvent", messageData);
 
   // 入力欄を初期化
   chatContent.value = ""
@@ -60,6 +68,13 @@ const onReceiveExit = (data) => {
 const onReceivePublish = (data) => {
   chatList.unshift(data)
 }
+
+// サーバーから受信したエラーを処理する
+const onReceiveError = (errorMessage) => {
+  // エラーメッセージをどのように表示するかは、アプリケーションに依存します
+  // 例えばアラート、モーダル、または特定のUIコンポーネントにエラーを表示することができます
+  alert(errorMessage);
+}
 // #endregion
 
 // #region local methods
@@ -75,10 +90,13 @@ const registerSocketEvent = () => {
     chatList.unshift(data)
   })
 
-  // 投稿イベントを受け取ったら実行
+  // 投稿, 入室, 退室イベントを受け取ったら実行
   socket.on("publishEvent", (data) => {
     chatList.unshift(data)
   })
+
+  // エラーイベントを受け取ったら実行
+  socket.on("errorEvent", onReceiveError);
 }
 // #endregion
 </script>
@@ -128,5 +146,4 @@ const registerSocketEvent = () => {
   color: #000;
   margin-top: 8px;
 }
-
 </style>

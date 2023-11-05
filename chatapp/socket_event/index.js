@@ -2,6 +2,22 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+// メッセージをデータベースに保存する関数
+async function saveMessage(content, userId, roomId) {
+  try {
+    return await prisma.message.create({
+      data: {
+        content,
+        senderId: userId,
+        roomId: roomId,
+      },
+    });
+  } catch (error) {
+    console.error('Error saving message:', error);
+    throw new Error('Message saving failed');
+  }
+}
+
 export default (io, socket) => {
   // 入室メッセージをクライアントに送信する
   socket.on("enterEvent", (data) => {
@@ -16,8 +32,18 @@ export default (io, socket) => {
   })
 
   // 投稿メッセージを送信する
-  socket.on("publishEvent", (data) => {
-    console.log("投稿: " + data)
-    io.sockets.emit("publishEvent", data)
+  socket.on("publishEvent", async (data) => {
+    try {
+      console.log(data);
+
+      // メッセージをデータベースに保存する
+      const message = await saveMessage(data.messageContent, data.userId, data.roomId);
+
+      // 保存したメッセージを全クライアントに送信する
+      io.sockets.emit("publishEvent", message);
+    } catch (error) {
+      // エラーメッセージを送信者にのみ送信する
+      socket.emit("errorEvent", "メッセージの保存に失敗しました。");
+    }
   })
 }
