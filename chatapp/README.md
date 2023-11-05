@@ -20,6 +20,10 @@
    例：`http://127.0.0.1:3000/`
 
 3. データベースの使い方
+  - prismaクライアントを作成する
+  ```bash
+  $ npx prisma generate
+  ```
   - データを見る
   ```bash
   $ npx prisma studio
