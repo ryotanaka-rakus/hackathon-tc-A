@@ -50,6 +50,9 @@ const onEnter = () => {
     </div>
     <button type="button" @click="onEnter" class="button-normal">入室する</button>
   </div>
+  
+  
+  
 </template>
 
 <style scoped>
