@@ -65,6 +65,11 @@
   - 入室の例） ○○○○ さんが入室しました
   - 退室の例） ○○○○ さんが退室しました
 
+
+### デザイン
+
+FigmaのURL：https://www.figma.com/file/uYKXLxW0Kt5iBg5JZaPyGi/Rakus_A?type=design&node-id=0%3A1&mode=design&t=g9Gxes6WTRvmCCMF-1
+
 ### 追加要件
 
 ※追加実装した機能を追記してください
