@@ -34,6 +34,85 @@ async function getUsers() {
   }
 }
 
+
+//ルーム一覧を返す関数
+async function getRooms() {
+  try {
+    return await prisma.Room.findMany({
+      select: {
+        name: true,
+      }
+    });
+  } catch (error) {
+    console.error('Error getting rooms:', error);
+    throw new Error('Getting rooms failed');
+  }
+}
+
+
+//ルーム選択を受け取り、UserRoomテーブルにUserIDとRoomIDを送信する
+async function addForUsersRooms(userName, roomId) {
+  console.log(userName,roomId)
+  try {
+    // UserテーブルからuserNameに対応するユーザーのIDを取得
+    const user = await prisma.User.findFirst({
+      where: {
+        name: userName,
+      },
+    });
+    if (!user) {
+      throw new Error(`User not found with name: ${userName}`);
+    }
+
+    // UserRoomsテーブルに新しいレコードを追加
+    return await prisma.UsersRooms.create({
+      data: {
+        userId: user.id, // ユーザーIDを使用
+        roomId: roomId,
+      },
+    });
+  } catch (error) {
+    console.error('Error adding user to room:', error);
+    throw new Error('Adding user to room failed');
+  }
+}
+
+
+//ユーザをデータベースに登録する関数
+async function addUser(userName, password) {
+  try {
+    //Userテーブルに追加
+    return await prisma.User.create({
+      data: {
+        name: userName,
+        password: password,
+      },
+    });
+  } catch (error) {
+    console.error('Error add user:', error);
+    throw new Error('add user failed');
+  }
+}
+
+//ログイン認証する関数
+async function authenticateUser(username, password) {
+  // nameとpasswordが一致する最初のレコードを取得、なかったらnullを返す
+  const user = await prisma.User.findFirst({
+    where: {
+      OR:[{name:{equals:username}},{password:{equals:password}}]
+    },
+  });
+  if (user && user.password === password) {
+    // パスワードが一致する場合
+    return true;
+  } else {
+    // ユーザーが見つからないか、パスワードが一致しない場合
+    return false;
+  }
+}
+
+
+
 export default (io, socket) => {
   // 入室メッセージをクライアントに送信する
   socket.on("enterEvent", (data) => {
@@ -76,4 +155,63 @@ export default (io, socket) => {
       socket.emit("errorEvent", "ユーザー情報の取得に失敗しました。");
     }
   });
+
+  //ルーム一覧にアクセスする
+  socket.on("getRooms", async () => {
+    try {
+      const rooms = await getRooms();
+      console.log(rooms)
+
+      // ルーム一覧をフロントに送信
+      socket.emit("expRooms", rooms);
+    } catch (error) {
+      // エラーメッセージを送信者にのみ送信する
+      socket.emit("errorEvent", "ルームの取得に失敗しました。");
+    }
+  });
+
+  // ユーザ情報をデータベースに登録する
+  socket.on("addUser", async (data) => {
+    try {
+      const add = await addUser(data.userName, data.password);
+    } catch (error) {
+      // エラーメッセージを送信者にのみ送信する
+      socket.emit("errorEvent", "ユーザの登録に失敗しました");
+    }
+  })
+
+   // ユーザID,ルームIDをUsersRoomsテーブルに登録する
+   socket.on("addUserToRoom", async (data) => {
+    const u_name=data.Username
+    const r_Id=data.RoomID
+    console.log(u_name)
+    console.log(r_Id)
+    try {
+      const add = await addForUsersRooms(u_name, r_Id);
+    } catch (error) {
+      // エラーメッセージを送信者にのみ送信する
+      socket.emit("errorEvent", "UsersRoomsへの登録に失敗しました");
+    }
+  })
+
+  //ログイン認証機能
+  socket.on("checkLogin", async (data) => {
+    const username=data.userName
+    const password=data.password
+    // ここでデータベースとの照合処理を実行
+    const isOk = await authenticateUser(username,password);
+    if (isOk) {
+      // ユーザーが見つかり、パスワードが一致する(認証成功)場合
+      socket.emit("authenticationResult", true);
+      console.log(username+"さんは認証成功しました");
+    } else {
+      // 認証失敗の場合
+      socket.emit("authenticationResult", false);
+      console.log(username+"さんは認証失敗しました");
+    }
+  });
+
 }
+
+
+
