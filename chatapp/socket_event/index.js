@@ -2,6 +2,67 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+// ブックマークをデータベースに保存する関数
+async function saveBookmark(userId, messageId) {
+  try {
+    return await prisma.bookmark.create({
+      data: {
+        userId,
+        messageId,
+      },
+    });
+  } catch (error) {
+    console.error('Error saving bookmark:', error);
+    throw new Error('Bookmark saving failed');
+  }
+}
+
+// ユーザーのブックマークを取得する関数
+async function getUserBookmarks(userId) {
+  try {
+    return await prisma.bookmark.findMany({
+      where: {
+        userId: userId,
+      },
+      include: {
+        message: true, // メッセージの内容も取得する
+      },
+    });
+  } catch (error) {
+    console.error('Error getting bookmarks:', error);
+    throw new Error('Getting bookmarks failed');
+  }
+}
+
+// ルームのチャット履歴を取得する
+async function getRoomChatList(roomId) {
+  try {
+    return await prisma.message.findMany({
+      where: {
+        roomId: roomId,
+      },
+    });
+  } catch (error) {
+    console.error('Error getting room chat list:', error);
+    throw new Error('Getting room chat list failed');
+  }
+}
+
+// メモをデータベースに保存する関数
+async function saveMemo(content, userId) {
+  try {
+    return await prisma.note.create({
+      data: {
+        content,
+        userId,
+      },
+    });
+  } catch (error) {
+    console.error('Error saving memo:', error);
+    throw new Error('Memo saving failed');
+  }
+}
+
 // メッセージをデータベースに保存する関数
 async function saveMessage(content, userId, roomId) {
   try {
@@ -111,8 +172,6 @@ async function authenticateUser(username, password) {
   }
 }
 
-
-
 export default (io, socket) => {
   // 入室メッセージをクライアントに送信する
   socket.on("enterEvent", (data) => {
@@ -146,7 +205,6 @@ export default (io, socket) => {
   socket.on("getUsersEvent", async () => {
     try {
       const users = await getUsers();
-      console.log(users)
 
       // ユーザー一覧をリクエストしたクライアントに送信する
       socket.emit("usersListEvent", users);
@@ -211,7 +269,50 @@ export default (io, socket) => {
     }
   });
 
+    // メモイベントハンドラ
+    socket.on("memoEvent", async (data) => {
+      try {
+        console.log(data);
+
+        // メモをデータベースに保存する
+        const memo = await saveMemo(data.content, data.userId);
+
+        // 保存したメモをリクエストしたクライアントに送信する
+        socket.emit("memoEvent", memo);
+      } catch (error) {
+        // エラーメッセージを送信者にのみ送信する
+        socket.emit("errorEvent", "メモの保存に失敗しました。");
+      }
+    });
+
+      // ブックマークのイベントハンドラ
+  socket.on("saveBookmarkEvent", async ({ userId, messageId }) => {
+    try {
+      const bookmark = await saveBookmark(userId, messageId);
+      socket.emit("bookmarkSavedEvent", bookmark);
+    } catch (error) {
+      socket.emit("errorEvent", "ブックマークの保存に失敗しました。");
+    }
+  });
+
+  // ユーザーのブックマークを取得するイベントハンドラ
+  socket.on("getUserBookmarksEvent", async (userId) => {
+    try {
+      const bookmarks = await getUserBookmarks(userId);
+      socket.emit("userBookmarksEvent", bookmarks);
+    } catch (error) {
+      socket.emit("errorEvent", "ブックマークの取得に失敗しました。");
+    }
+  });
+
+  // ルームのチャット履歴を取得するハンドラ
+  socket.on("getRoomChatListEvent", async (roomId) => {
+    try {
+      console.log("ルームのチャット履歴を取得")
+      const chatList = await getRoomChatList(roomId);
+      socket.emit("roomChatListEvent", chatList);
+    } catch (error) {
+      socket.emit("errorEvent", "ブックマークの取得に失敗しました。");
+    }
+  });
 }
-
-
-
