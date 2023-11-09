@@ -17,34 +17,39 @@ model User {
   rooms    UsersRooms[]
   messages Message[]
   replies  MessageReply[]
+  Bookmark Bookmark[]
+  Note     Note[]
 }
 
 model UsersRooms {
-  id     Int    @id @default(autoincrement())
+  id     Int  @id @default(autoincrement())
   userId Int
   roomId Int
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  room   Room   @relation(fields: [roomId], references: [id])
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room   Room @relation(fields: [roomId], references: [id])
 }
 
 model Room {
-  id               Int           @id @default(autoincrement())
-  name             String
+  id                Int             @id @default(autoincrement())
+  name              String
   is_direct_message Int
-  usersRooms       UsersRooms[]
-  messages         Message[]
+  usersRooms        UsersRooms[]
+  messages          Message[]
+  PinnedMessage     PinnedMessage[]
 }
 
 model Message {
-  id            Int                   @id @default(autoincrement())
+  id            Int                  @id @default(autoincrement())
   roomId        Int
   senderId      Int
   content       String
-  createdAt     DateTime              @default(now())
-  room          Room                  @relation(fields: [roomId], references: [id])
-  sender        User                  @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  createdAt     DateTime             @default(now())
+  room          Room                 @relation(fields: [roomId], references: [id])
+  sender        User                 @relation(fields: [senderId], references: [id], onDelete: Cascade)
   editHistories MessageEditHistory[]
   replies       MessageReply[]
+  Bookmark      Bookmark[]
+  PinnedMessage PinnedMessage[]
 }
 
 model MessageEditHistory {
@@ -56,20 +61,43 @@ model MessageEditHistory {
 }
 
 model MessageReply {
-  id            Int                      @id @default(autoincrement())
+  id            Int                       @id @default(autoincrement())
   messageId     Int
   senderId      Int
   content       String
-  createdAt     DateTime                 @default(now())
-  message       Message                  @relation(fields: [messageId], references: [id])
-  sender        User                     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  createdAt     DateTime                  @default(now())
+  message       Message                   @relation(fields: [messageId], references: [id])
+  sender        User                      @relation(fields: [senderId], references: [id], onDelete: Cascade)
   editHistories MessageReplyEditHistory[]
 }
 
 model MessageReplyEditHistory {
-  id              Int           @id @default(autoincrement())
+  id              Int          @id @default(autoincrement())
   messageReplyId  Int
   previousContent String
-  createdAt       DateTime      @default(now())
-  messageReply    MessageReply  @relation(fields: [messageReplyId], references: [id], onDelete: Cascade)
+  createdAt       DateTime     @default(now())
+  messageReply    MessageReply @relation(fields: [messageReplyId], references: [id], onDelete: Cascade)
+}
+
+model Bookmark {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  messageId Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   Message @relation(fields: [messageId], references: [id])
+}
+
+model PinnedMessage {
+  id        Int     @id @default(autoincrement())
+  roomId    Int
+  messageId Int
+  room      Room    @relation(fields: [roomId], references: [id])
+  message   Message @relation(fields: [messageId], references: [id])
+}
+
+model Note {
+  id      Int    @id @default(autoincrement())
+  userId  Int
+  content String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
