@@ -16,12 +16,17 @@ const socket = socketManager.getInstance()
 const fetchUsers = () => {
   socket.emit("getUsersEvent"); // サーバにユーザー一覧を要求する
 }
+
+const fetchChatList = () => {
+  socket.emit("getRoomChatListEvent")
+}
 // #endregion
 
 // #region reactive variable
 const chatContent = ref("")
 const chatList = reactive([])
 const memoList = reactive([])
+const bookmarkList = reactive([]) // ブックマーク一覧を格納するためのリアクティブな配列
 const userList = reactive([]) // ユーザー一覧を格納するためのリアクティブな配列
 // #endregion
 
@@ -29,6 +34,8 @@ const userList = reactive([]) // ユーザー一覧を格納するためのリ�
 onMounted(() => {
   registerSocketEvent()
   fetchUsers() // コンポーネントがマウントされたらユーザー一覧を取得する
+  fetchUserBookmarks()
+  fetchChatList()
 })
 // #endregion
 
@@ -85,6 +92,15 @@ const onReceiveMemo = (memo) => {
   memoList.unshift(memo)
 }
 
+// ブックマークをサーバーに保存する
+const saveBookmark = (messageId) => {
+  socket.emit("saveBookmarkEvent", { userId, messageId });
+};
+
+// サーバーからユーザーのブックマークを取得する
+const fetchUserBookmarks = () => {
+  socket.emit("getUserBookmarksEvent", userId);
+};
 // #endregion
 
 // #region socket event handler
@@ -111,7 +127,7 @@ const registerSocketEvent = () => {
 
   // 投稿イベントを受け取ったら実行
   socket.on("publishEvent", (data) => {
-    chatList.unshift(data)
+    chatList.push(data)
   })
 
   // メモイベントを受け取ったら実行
@@ -124,6 +140,22 @@ const registerSocketEvent = () => {
   socket.on("usersListEvent", (users) => {
     userList.splice(0, userList.length, ...users) // 受け取ったユーザー一覧で更新
   })
+
+  // ブックマーク保存イベントを受け取ったら実行
+  socket.on("bookmarkSavedEvent", (bookmark) => {
+    bookmarkList.push(bookmark);
+  });
+
+  // ユーザーブックマークイベントを受け取ったら実行
+  socket.on("userBookmarksEvent", (bookmarks) => {
+    bookmarkList.splice(0, bookmarkList.length, ...bookmarks); // 既存の配列を新しいブックマークで置き換え
+  });
+
+
+  // roomChatListイベントを受け取ったら実行
+  socket.on("roomChatListEvent", (receivedCharList) => {
+    chatList.splice(0, chatList.length, ...receivedCharList)
+  });
 }
 
 
@@ -146,6 +178,8 @@ const registerSocketEvent = () => {
         <ul>
           <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">
             {{ userList.filter((user) => user.id == chat.senderId)[0].name + "さん: " + chat.content }}
+            <!-- ブックマークボタン -->
+            <button @click="saveBookmark(chat.id)">ブックマーク</button>
           </li>
         </ul>
       </div>
@@ -157,6 +191,15 @@ const registerSocketEvent = () => {
           </li>
         </ul>
       </div>
+      <!-- ブックマーク一覧 -->
+      <h4>ブックマーク一覧</h4>
+      <ul>
+        <li v-for="bookmark in bookmarkList" :key="bookmark.id">
+          <div v-if="chatList.filter((chat) => chat.id == bookmark.messageId)[0]">
+            {{ userList.filter((user) => user.id == bookmark.userId)[0].name + "さん: " + chatList.filter((chat) => chat.id == bookmark.messageId)[0].content }}
+          </div>
+        </li>
+      </ul>
     </div>
     <router-link to="/" class="link">
       <button type="button" class="button-normal button-exit" @click="onExit">退室する</button>
