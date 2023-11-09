@@ -2,6 +2,7 @@
 import { inject, ref, registerRuntimeCompiler, onMounted } from "vue"
 import { useRouter } from "vue-router"
 import socketManager from '../socketManager.js'
+import axios from 'axios'
 
 // #region global state
 const userName = inject("userName")
@@ -17,6 +18,7 @@ const inputUserName = ref("")
 const inputPassword = ref("")
 const isLogin = ref(false) //Trueならログイン、Falseなら新規登録
 // #endregion
+
 
 //　トグルボタンで新規登録かログインか切り替え
 const onToggleForm = () => {
