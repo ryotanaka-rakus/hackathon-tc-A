@@ -20,10 +20,12 @@ const isLogin = ref(false) //Trueならログイン、Falseなら新規登録
 // #endregion
 
 
+
 //　トグルボタンで新規登録かログインか切り替え
 const onToggleForm = () => {
   isLogin.value = !isLogin.value
 }
+
 
 //入室が成功した時の処理まとめ
 const enterVerified = (username) => {
@@ -37,6 +39,15 @@ const enterVerified = (username) => {
   socket.emit("enterEvent", userName.value + "さんが入室しました")
 }
 
+
+const loginOrAdd=() =>{
+  isLogin.value = !isLogin.value
+  console.log(isLogin.value)
+}
+// const toggleLogin = () => {
+//   isLogin.value = !isLogin.value;
+// }
+
 //「新規登録」か「ログイン」が押された時（左のボタン）
 const onSubmit = () => {
   const inUserName = inputUserName.value.trim()
@@ -47,7 +58,7 @@ const onSubmit = () => {
   }
 
   if (inUserName && inPassword)//空の入力でなければ
-   {
+  {
     if (isLogin.value) //ログインの場合
     {
       socket.emit("checkLogin", inUserData)
@@ -93,11 +104,14 @@ const onSubmit = () => {
       <p>パスワード</p>
       <input type="password" v-model="inputPassword" class="user-password-text" />
     </div>
-    <button type="button" @click="onSubmit" class="button-normal">{{ isLogin ? 'ログイン' : '新規登録' }}</button>
-    <button type="button" @click="onToggleForm" class="button-toggle">{{ isLogin ? '新規登録' : 'ログイン' }}</button>
+    <div class="button-container">
+    <button type="button" @click="loginOrAdd" :class="{ 'active': isLogin, 'inactive': !isLogin }">ログイン</button>
+    <button type="button" @click="loginOrAdd" :class="{ 'active': !isLogin, 'inactive': isLogin }">新規登録</button>
+   
+    </div>
+    <button type="button" @click="onSubmit" class="submit-button">送信</button>
   </div>
 </template>
-
 
 <style scoped>
 .user-name-text,
@@ -107,16 +121,41 @@ const onSubmit = () => {
   margin-bottom: 16px;
 }
 
-.button-normal {
-  margin-right: 10px;
+.button-container {
+  display: flex;
+  justify-content: start;
+  gap: 8px; /* ボタン間の隙間を設定 */
+  margin-bottom: 10px;
 }
 
-.button-toggle {
-  margin-top: 10px;
-  background-color: lightgray;
-  border: none;
-  padding: 8px 16px;
+.button-container > button {
+  padding: 10px 20px;
+  border: 1px solid transparent;
+  background-color: #ccc; /* デフォルトの背景色（灰色） */
   cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.button-container > button.active {
+  background-color: #007bff;
+  color: white;
+}
+
+.button-container > button.inactive {
+  background-color: #ccc; /* 非アクティブの背景色（灰色） */
+  color: #000;
+}
+
+.submit-button {
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+  background-color: #218838;
 }
 </style>
-
