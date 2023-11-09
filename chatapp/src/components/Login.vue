@@ -2,7 +2,7 @@
 import { inject, ref, registerRuntimeCompiler, onMounted } from "vue"
 import { useRouter } from "vue-router"
 import socketManager from '../socketManager.js'
-import axios from 'axios'
+
 
 // #region global state
 const userName = inject("userName")
@@ -62,8 +62,17 @@ const onSubmit = () => {
       });
     } else // 新規登録の場合
     {
-      socket.emit("addUser", inUserData)
-      enterVerified(inUserName);
+      socket.emit("checkNewName", inUserData)
+      socket.on('authAddUser', (result) => {
+        if (result) {
+          //認証成功の処理
+          enterVerified(inUserName);
+        } else {
+          // 認証失敗の処理
+          alert('すでに同じユーザー名が登録されています。\n名前を変えて登録してください。');
+        }
+      });
+      // enterVerified(inUserName);
     }
   } else {
     alert('ユーザ名またはパスワードを入力してください')

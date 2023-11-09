@@ -141,6 +141,17 @@ async function addForUsersRooms(userName, roomId) {
 
 //ユーザをデータベースに登録する関数
 async function addUser(userName, password) {
+  const user = await prisma.User.findFirst({
+    where: {
+      OR: [
+        { name: { equals: userName } }
+      ]
+    },
+  });
+  if (user) {
+    // ユーザー名が一致するユーザーが見つかった場合
+    return false;
+  }
   try {
     //Userテーブルに追加
     return await prisma.User.create({
@@ -269,6 +280,20 @@ export default (io, socket) => {
     }
   });
 
+  socket.on("checkNewName", async (data) => {
+    const username=data.userName
+    const password=data.password
+    // ここでデータベースとの照合処理を実行
+    const isOkUser = await addUser(username, password);
+    if (isOkUser) {
+      socket.emit("authAddUser", true);
+    } else {
+      socket.emit("authAddUser", false);
+      console.log(username+"さんは認証失敗しました");
+    }
+  });
+
+
     // メモイベントハンドラ
     socket.on("memoEvent", async (data) => {
       try {
@@ -315,4 +340,5 @@ export default (io, socket) => {
       socket.emit("errorEvent", "ブックマークの取得に失敗しました。");
     }
   });
+
 }
