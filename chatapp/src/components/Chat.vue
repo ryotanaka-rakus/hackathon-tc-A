@@ -21,6 +21,7 @@ const fetchUsers = () => {
 // #region reactive variable
 const chatContent = ref("")
 const chatList = reactive([])
+const memoList = reactive([])
 const userList = reactive([]) // ユーザー一覧を格納するためのリアクティブな配列
 // #endregion
 
@@ -59,14 +60,31 @@ const onExit = () => {
   socket.emit("exitEvent", userName.value + "さんが退室しました")
 }
 
-// メモを画面上に表示する
+// メモをサーバに送信する
 const onMemo = () => {
-  // メモの内容を表示
-  chatList.unshift(userName.value + "さんのメモ：" + chatContent.value)
+  // メモの内容が入力されているかチェック
+  const memoText = chatContent.value.trim();
 
-  // 入力欄を初期化
-  chatContent.value = ""
+  if (memoText) {
+    const memoData = {
+      content: chatContent.value,
+      userId: userId,
+    }
+    socket.emit("memoEvent", memoData);
+
+    // 入力欄を初期化
+    chatContent.value = ""
+  }
+  else {
+    alert("メモを入力してください。")
+  }
 }
+
+// サーバーから受信したメモを画面上に表示する
+const onReceiveMemo = (memo) => {
+  memoList.unshift(memo)
+}
+
 // #endregion
 
 // #region socket event handler
@@ -111,6 +129,9 @@ const registerSocketEvent = () => {
     chatList.unshift(data)
   })
 
+  // メモイベントを受け取ったら実行
+  socket.on("memoEvent", onReceiveMemo);
+
   // エラーイベントを受け取ったら実行
   socket.on("errorEvent", onReceiveError);
 
@@ -136,9 +157,18 @@ const registerSocketEvent = () => {
         <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
       </div>
       <div class="mt-5" v-if="chatList.length !== 0">
+        <h4>ChatList</h4>
         <ul>
           <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">
             {{ userList.filter((user) => user.id == chat.senderId)[0].name + "さん: " + chat.content }}
+          </li>
+        </ul>
+      </div>
+      <div class="mt-5" v-if="memoList.length !== 0">
+        <h4>MemoList</h4>
+        <ul>
+          <li class="item mt-4" v-for="(memo, i) in memoList" :key="i">
+            {{ memo.content }}
           </li>
         </ul>
       </div>

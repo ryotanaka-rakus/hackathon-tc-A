@@ -2,6 +2,21 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+// メモをデータベースに保存する関数
+async function saveMemo(content, userId) {
+  try {
+    return await prisma.note.create({
+      data: {
+        content,
+        userId,
+      },
+    });
+  } catch (error) {
+    console.error('Error saving memo:', error);
+    throw new Error('Memo saving failed');
+  }
+}
+
 // メッセージをデータベースに保存する関数
 async function saveMessage(content, userId, roomId) {
   try {
@@ -211,7 +226,19 @@ export default (io, socket) => {
     }
   });
 
+    // メモイベントハンドラ
+    socket.on("memoEvent", async (data) => {
+      try {
+        console.log(data);
+
+        // メモをデータベースに保存する
+        const memo = await saveMemo(data.content, data.userId);
+
+        // 保存したメモをリクエストしたクライアントに送信する
+        socket.emit("memoEvent", memo);
+      } catch (error) {
+        // エラーメッセージを送信者にのみ送信する
+        socket.emit("errorEvent", "メモの保存に失敗しました。");
+      }
+    });
 }
-
-
-
