@@ -55,20 +55,20 @@ const enterRoom = (roomid) => {
 </script>
 
 <template>
-  <h1>Room Selection</h1>
-  <h1>{{ userName }}さん、こんにちは</h1>
-  <h2>ルームを選択してください</h2>
+  <div class="flex justify-center mt-20">
+    <h1 class="text-gray-600 font-bold text-4xl mt-15">ルームを選択してください</h1>
+  </div>
   <div>
     <!-- ルーム情報をタイル状に表示 -->
-    <div v-for="(room, index) in roomList" :key="index" class="room-tile">
+    <div v-for="(room, index) in roomList" :key="index" class="mt-20 flex justify-between flex-col items-center">
       <!-- ボタン要素としてラップ -->
-      <button @click="enterRoom(index + 1)" class="room-button">{{ room.name }}</button>
+      <button @click="enterRoom(index + 1)" class="py-3 px-4 bg-blue-500 rounded text-white hover:bg-blue-700 shadow-lg transition-all hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:ring focus:border-blue-300">{{ room.name }}</button>
     </div>
   </div>
 </template>
 
 <style scoped>
-.link {
+/* .link {
   text-decoration: none;
 }
 
@@ -89,33 +89,30 @@ const enterRoom = (roomid) => {
 .button-exit {
   color: #000;
   margin-top: 8px;
-}
+} */
 
 /* タイルのスタイル */
-.room-tile {
+/* .room-tile {
   display: inline-block;
   margin: 10px;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
   text-align: center;
-}
+} */
 
 /* ボタンのスタイル */
-.room-button {
+/* .room-button {
   background-color: #007bff;
-  /* ボタンの背景色 */
   color: #fff;
-  /* ボタンの文字色 */
   border: none;
   border-radius: 5px;
   padding: 10px 20px;
   cursor: pointer;
   font-size: 16px;
-}
+} */
 
-.room-button:hover {
+/* .room-button:hover {
   background-color: #0056b3;
-  /* ホバー時の背景色 */
-}
+} */
 </style>
