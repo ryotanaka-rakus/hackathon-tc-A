@@ -166,48 +166,57 @@ const registerSocketEvent = () => {
 
 <template>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <div class="mx-auto my-5 px-4">
-    <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
-    <div class="mt-10">
-      <p>ログインユーザ：{{ userName }}さん</p>
-      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent"></textarea>
-      <div class="mt-5">
-        <button class="button-normal" @click="onPublish">投稿</button>
-        <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
-      </div>
-      <div class="mt-5" v-if="chatList.length !== 0">
-        <h4>ChatList</h4>
-        <div id="commentSection" class="max-w-screen-md max-h-32 overflow-y-auto border p-3">
-          <ul>
-            <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">{{ userList.filter((user) => user.id == chat.senderId)[0].name + "さん: " + chat.content }}
-              <!-- ブックマークボタン -->
-              <button @click="saveBookmark(chat.id)">ブックマーク</button>
-            </li>
-          </ul>
-        </div>
-      </div>
-      <div class="mt-5" v-if="memoList.length !== 0">
-        <h4>MemoList</h4>
-        <div id="commentSection" class="max-w-screen-md max-h-32 overflow-y-auto border p-3">
-          <ul>
-            <li class="item mt-4" v-for="(memo, i) in memoList" :key="i">{{ memo.content }}</li>
-          </ul>
-        </div>
-      </div>
-      <!-- ブックマーク一覧 -->
-      <h4>ブックマーク一覧</h4>
-      <div id="commentSection" class="max-w-screen-md max-h-32 overflow-y-auto border p-3">
-        <ul>
-          <li v-for="bookmark in bookmarkList" :key="bookmark.id">
-            <div v-if="chatList.filter((chat) => chat.id == bookmark.messageId)[0]">{{ userList.filter((user) => user.id == bookmark.userId)[0].name + "さん: " + chatList.filter((chat) => chat.id == bookmark.messageId)[0].content }}
+  <div class="flex">
+    <div class="max-w-xs border-r-2 border-gray-500 p-2">
+    aaaaaaaaaaaaaa
+    <div>
+      <router-link to="/" class="link">
+          <button type="button" class="button-normal button-exit" @click="onExit">退室する</button>
+        </router-link>
+    </div>
+    </div>
+    <div class="flex-1 p-3">
+      <div class=" my-5 px-4">
+        <div class="mt-10">
+          <div class="mt-5" v-if="chatList.length !== 0">
+            <h4>ChatList</h4>
+            <div id="commentSection" class="max-w-screen-md max-h-32 overflow-y-auto border p-3">
+              <ul>
+                <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">{{ userList.filter((user) => user.id == chat.senderId)[0].name + "さん: " + chat.content }}
+                  <!-- ブックマークボタン -->
+                  <button @click="saveBookmark(chat.id)">ブックマーク</button>
+                </li>
+              </ul>
+             </div>
+          </div>
+          <div class="mt-5" v-if="memoList.length !== 0">
+            <h4>MemoList</h4>
+            <div id="commentSection" class="max-w-screen-md max-h-32 overflow-y-auto border p-3">
+              <ul>
+                <li class="item mt-4" v-for="(memo, i) in memoList" :key="i">{{ memo.content }}</li>
+              </ul>
             </div>
-          </li>
-        </ul>
+          </div>
+          <!-- ブックマーク一覧 -->
+         <h4>ブックマーク一覧</h4>
+          <div id="commentSection" class="max-w-screen-md max-h-32 overflow-y-auto border p-3">
+            <ul>
+              <li v-for="bookmark in bookmarkList" :key="bookmark.id">
+                <div v-if="chatList.filter((chat) => chat.id == bookmark.messageId)[0]">{{ userList.filter((user) => user.id == bookmark.userId)[0].name + "さん: " + chatList.filter((chat) => chat.id == bookmark.messageId)[0].content }}
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent"></textarea>
+            <div class="flex ">
+              <button class="button-normal" @click="onPublish">投稿</button>
+              <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <router-link to="/" class="link">
-      <button type="button" class="button-normal button-exit" @click="onExit">退室する</button>
-    </router-link>
   </div>
 </template>
 
