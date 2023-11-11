@@ -165,6 +165,7 @@ const registerSocketEvent = () => {
 </script>
 
 <template>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <div class="mx-auto my-5 px-4">
     <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
     <div class="mt-10">
@@ -176,31 +177,33 @@ const registerSocketEvent = () => {
       </div>
       <div class="mt-5" v-if="chatList.length !== 0">
         <h4>ChatList</h4>
-        <ul>
-          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">
-            {{ userList.filter((user) => user.id == chat.senderId)[0].name + "さん: " + chat.content }}
-            <!-- ブックマークボタン -->
-            <button @click="saveBookmark(chat.id)">ブックマーク</button>
-          </li>
-        </ul>
+        <div id="commentSection" class="max-w-screen-md max-h-32 overflow-y-auto border p-3">
+          <ul>
+            <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">{{ userList.filter((user) => user.id == chat.senderId)[0].name + "さん: " + chat.content }}
+              <!-- ブックマークボタン -->
+              <button @click="saveBookmark(chat.id)">ブックマーク</button>
+            </li>
+          </ul>
+        </div>
       </div>
       <div class="mt-5" v-if="memoList.length !== 0">
         <h4>MemoList</h4>
-        <ul>
-          <li class="item mt-4" v-for="(memo, i) in memoList" :key="i">
-            {{ memo.content }}
-          </li>
-        </ul>
+        <div id="commentSection" class="max-w-screen-md max-h-32 overflow-y-auto border p-3">
+          <ul>
+            <li class="item mt-4" v-for="(memo, i) in memoList" :key="i">{{ memo.content }}</li>
+          </ul>
+        </div>
       </div>
       <!-- ブックマーク一覧 -->
       <h4>ブックマーク一覧</h4>
-      <ul>
-        <li v-for="bookmark in bookmarkList" :key="bookmark.id">
-          <div v-if="chatList.filter((chat) => chat.id == bookmark.messageId)[0]">
-            {{ userList.filter((user) => user.id == bookmark.userId)[0].name + "さん: " + chatList.filter((chat) => chat.id == bookmark.messageId)[0].content }}
-          </div>
-        </li>
-      </ul>
+      <div id="commentSection" class="max-w-screen-md max-h-32 overflow-y-auto border p-3">
+        <ul>
+          <li v-for="bookmark in bookmarkList" :key="bookmark.id">
+            <div v-if="chatList.filter((chat) => chat.id == bookmark.messageId)[0]">{{ userList.filter((user) => user.id == bookmark.userId)[0].name + "さん: " + chatList.filter((chat) => chat.id == bookmark.messageId)[0].content }}
+            </div>
+          </li>
+        </ul>
+      </div>
     </div>
     <router-link to="/" class="link">
       <button type="button" class="button-normal button-exit" @click="onExit">退室する</button>
