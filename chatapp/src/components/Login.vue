@@ -97,6 +97,7 @@ const onSubmit = () => {
 </script>
 
 <template>
+  
   <div class="mx-auto my-5 px-4">
     <div class="text-red-700 hover:bg-blue-200 font-bold">test</div>
     <h1 class="text-h3 font-weight-medium">Vue.js Chat サンプル</h1>
