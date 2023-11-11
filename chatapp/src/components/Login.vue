@@ -97,32 +97,29 @@ const onSubmit = () => {
 </script>
 
 <template>
-  
-  <div class="mx-auto my-5 px-4">
-    <div class="text-red-700 hover:bg-blue-200 font-bold">test</div>
-    <h1 class="text-h3 font-weight-medium">Vue.js Chat サンプル</h1>
-    <div class="mt-10">
-      <p>ユーザー名</p>
-      <input type="text" v-model="inputUserName" class="user-name-text" />
-      <p>パスワード</p>
-      <input type="password" v-model="inputPassword" class="user-password-text" />
+  <div class="flex justify-center mt-20">
+    <h1 class="text-blue-700 font-bold text-6xl mt-20">ChatApp</h1>
+  </div>
+  <div class="mt-20 flex justify-center flex-col items-center">
+    <div class="flex justify-center">
+      <p class="mt-1 mr-10">ユーザー名</p>
+      <input type="text" v-model="inputUserName" class="pr-10 border-2 border-solid border-gray-300" />
     </div>
+    <div class="flex justify-center mt-10">
+      <p class="mt-1 mr-10">パスワード</p>
+      <input type="password" v-model="inputPassword" class="pr-10 border-2 border-solid border-gray-300" />
+    </div>
+  </div>
+  <div class="mt-15 flex justify-center ml-32">
     <div class="button-container">
-    <button type="button" @click="loginOrAdd" :class="{ 'active': isLogin, 'inactive': !isLogin }">ログイン</button>
-    <button type="button" @click="loginOrAdd" :class="{ 'active': !isLogin, 'inactive': isLogin }">新規登録</button>
-   
+      <button type="button" @click="loginOrAdd" :class="{ 'active': isLogin, 'inactive': !isLogin }">ログイン</button>
+      <button class="ml-5" type="button" @click="loginOrAdd" :class="{ 'active': !isLogin, 'inactive': isLogin }">新規登録</button>
     </div>
-    <button type="button" @click="onSubmit" class="submit-button">送信</button>
+    <button type="button" @click="onSubmit" class="ml-10 py-3 px-4 bg-blue-500 rounded text-white hover:bg-blue-700 shadow-md transition-all hover:shadow-lg hover:shadow-blue-500/25">送信</button>
   </div>
 </template>
 
 <style scoped>
-.user-name-text,
-.user-password-text {
-  width: 200px;
-  border: 1px solid #888;
-  margin-bottom: 16px;
-}
 
 .button-container {
   display: flex;
@@ -147,18 +144,5 @@ const onSubmit = () => {
 .button-container > button.inactive {
   background-color: #ccc; /* 非アクティブの背景色（灰色） */
   color: #000;
-}
-
-.submit-button {
-  padding: 10px 20px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.submit-button:hover {
-  background-color: #218838;
 }
 </style>
