@@ -1,6 +1,7 @@
 <script setup>
 import { inject, ref, reactive, onMounted } from "vue"
 import socketManager from '../socketManager.js'
+import 'tailwindcss/tailwind.css'
 
 // #region global state
 const userName = inject("userName")

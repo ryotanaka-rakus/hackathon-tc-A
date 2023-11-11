@@ -2,6 +2,7 @@
 import { inject, ref, registerRuntimeCompiler, onMounted } from "vue"
 import { useRouter } from "vue-router"
 import socketManager from '../socketManager.js'
+import 'tailwindcss/tailwind.css'
 
 
 // #region global state
@@ -97,6 +98,7 @@ const onSubmit = () => {
 
 <template>
   <div class="mx-auto my-5 px-4">
+    <div class="text-red-700 hover:bg-blue-200 font-bold">test</div>
     <h1 class="text-h3 font-weight-medium">Vue.js Chat サンプル</h1>
     <div class="mt-10">
       <p>ユーザー名</p>
@@ -123,7 +125,7 @@ const onSubmit = () => {
 
 .button-container {
   display: flex;
-  justify-content: start;
+  justify-content: flex-start;
   gap: 8px; /* ボタン間の隙間を設定 */
   margin-bottom: 10px;
 }
