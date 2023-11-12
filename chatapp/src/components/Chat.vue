@@ -169,11 +169,28 @@ const registerSocketEvent = () => {
   <div class="flex">
     <div class="w-64 md:w-72 border-r-2 border-gray-500 p-2 flex flex-col h-auto">
       <div class="flex-grow">
-        aaaaaaaaaaaa
+        <div class="mt-3">
+          オンライン
+          <div>
+            ・ff
+          </div>
+          <div>
+            ・abcd
+          </div>
+        </div>
+        <div class="mt-5">
+          オフライン
+          <div>
+            ・ああああああ
+          </div>
+          <div>
+            ・aaaaaaaa
+          </div>
+        </div>
       </div>
       <div class="">
         <router-link to="/" class="link">
-          <button type="button" class="button-normal button-exit" @click="onExit">退室する</button>
+          <button type="button" class="py-2 px-4 bg-gray-500 rounded text-white hover:bg-gray-700 shadow-md transition-all hover:shadow-lg hover:shadow-gray-500/25" @click="onExit">退室する</button>
         </router-link>
       </div>
     </div>
