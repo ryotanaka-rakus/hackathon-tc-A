@@ -201,7 +201,7 @@ const registerSocketEvent = () => {
           <div>
             <div class="mt-5" v-if="chatList.length !== 0">
               <h4>ChatList</h4>
-              <div id="commentSection" class="max-w-10/12 max-h-72 overflow-y-auto border p-3">
+              <div id="commentSection" class="max-w-10/12 max-h-80 overflow-y-auto border p-3">
                 <ul>
                   <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">{{ userList.filter((user) => user.id == chat.senderId)[0].name + "さん: " + chat.content }}
                     <!-- ブックマークボタン -->
@@ -212,7 +212,7 @@ const registerSocketEvent = () => {
             </div>
             <div class="mt-5" v-if="memoList.length !== 0">
               <h4>MemoList</h4>
-              <div id="commentSection" class="max-w-10/12 max-h-72 overflow-y-auto border p-3">
+              <div id="commentSection" class="max-w-10/12 max-h-80 overflow-y-auto border p-3">
                 <ul>
                   <li class="item mt-4" v-for="(memo, i) in memoList" :key="i">{{ memo.content }}</li>
                 </ul>
@@ -222,7 +222,7 @@ const registerSocketEvent = () => {
           <div class="mt-5 ml-5">
             <!-- ブックマーク一覧 -->
             <h4>ブックマーク一覧</h4>
-            <div id="commentSection" class="max-w-10/12 overflow-y-auto border p-3" style="max-height: 620px;">
+            <div id="commentSection" class="max-w-10/12 overflow-y-auto border p-3" style="max-height: 684px;">
               <ul>
                 <li v-for="bookmark in bookmarkList" :key="bookmark.id">
                   <div v-if="chatList.filter((chat) => chat.id == bookmark.messageId)[0]">{{ userList.filter((user) => user.id == bookmark.userId)[0].name + "さん: " + chatList.filter((chat) => chat.id == bookmark.messageId)[0].content }}
