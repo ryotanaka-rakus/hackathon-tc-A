@@ -196,12 +196,12 @@ const registerSocketEvent = () => {
     </div>
 
     <div class="flex-1 p-3">
-      <div class="my-5 px-4">
+      <div class="my-5 ">
         <div class="flex justify-center">
           <div>
             <div class="mt-5" v-if="chatList.length !== 0">
               <h4>ChatList</h4>
-              <div id="commentSection" class="max-w-screen-md max-h-32 overflow-y-auto border p-3">
+              <div id="commentSection" class="max-w-10/12 max-h-72 overflow-y-auto border p-3">
                 <ul>
                   <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">{{ userList.filter((user) => user.id == chat.senderId)[0].name + "さん: " + chat.content }}
                     <!-- ブックマークボタン -->
@@ -212,17 +212,17 @@ const registerSocketEvent = () => {
             </div>
             <div class="mt-5" v-if="memoList.length !== 0">
               <h4>MemoList</h4>
-              <div id="commentSection" class="max-w-screen-md max-h-32 overflow-y-auto border p-3">
+              <div id="commentSection" class="max-w-10/12 max-h-72 overflow-y-auto border p-3">
                 <ul>
                   <li class="item mt-4" v-for="(memo, i) in memoList" :key="i">{{ memo.content }}</li>
                 </ul>
               </div>
             </div>
           </div>
-          <div class="mt-5">
+          <div class="mt-5 ml-5">
             <!-- ブックマーク一覧 -->
             <h4>ブックマーク一覧</h4>
-            <div id="commentSection" class="max-w-screen-md max-h-32 overflow-y-auto border p-3">
+            <div id="commentSection" class="max-w-10/12 overflow-y-auto border p-3" style="max-height: 620px;">
               <ul>
                 <li v-for="bookmark in bookmarkList" :key="bookmark.id">
                   <div v-if="chatList.filter((chat) => chat.id == bookmark.messageId)[0]">{{ userList.filter((user) => user.id == bookmark.userId)[0].name + "さん: " + chatList.filter((chat) => chat.id == bookmark.messageId)[0].content }}
@@ -232,11 +232,13 @@ const registerSocketEvent = () => {
             </div>
           </div>
         </div>
-        <div class="flex justify-center">
-          <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent"></textarea>
-          <div class="mt-10 ml-5">
-            <button class="button-normal" @click="onPublish">投稿</button>
-            <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
+        <div class="flex justify-center mt-5">
+          <textarea variant="outlined" placeholder="投稿文を入力してください" class="pr-0 border-2 border-solid border-gray-300 w-96" v-model="chatContent"></textarea>
+          
+            <!-- <textarea variant="outlined" placeholder="投稿文を入力してください" class="border-2 border-solid border-gray-400 pr-0 w-full" v-model="chatContent"></textarea> -->
+          <div class="mt-2 ml-5">
+            <button class="py-2 px-3 bg-gray-500 rounded text-white hover:bg-blue-500 shadow-lg transition-all hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:border-blue-300" @click="onPublish">投稿</button>
+            <button class="ml-5 py-2 px-3 bg-gray-500 rounded text-white hover:bg-blue-500 shadow-lg transition-all hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:border-blue-300" @click="onMemo">メモ</button>
           </div>
         </div>
       </div>
