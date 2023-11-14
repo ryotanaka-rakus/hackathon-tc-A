@@ -28,6 +28,7 @@ const chatContent = ref("")
 const chatList = reactive([])
 const memoList = reactive([])
 const bookmarkList = reactive([]) // ブックマーク一覧を格納するためのリアクティブな配列
+const pinMessageList = reactive([]) // ブックマーク一覧を格納するためのリアクティブな配列
 const userList = reactive([]) // ユーザー一覧を格納するためのリアクティブな配列
 // #endregion
 
@@ -36,6 +37,7 @@ onMounted(() => {
   registerSocketEvent()
   fetchUsers() // コンポーネントがマウントされたらユーザー一覧を取得する
   fetchUserBookmarks()
+  fetchPinnedMessages()
   fetchChatList()
 })
 // #endregion
@@ -98,10 +100,18 @@ const saveBookmark = (messageId) => {
   socket.emit("saveBookmarkEvent", { userId, messageId });
 };
 
+const pinMessage = (messageId) => {
+  socket.emit("pinMessageEvent", { roomId, messageId })
+}
+
 // サーバーからユーザーのブックマークを取得する
 const fetchUserBookmarks = () => {
   socket.emit("getUserBookmarksEvent", userId);
 };
+
+const fetchPinnedMessages = () => {
+  socket.emit("getPinnedMessagesEvent", roomId)
+}
 // #endregion
 
 // #region socket event handler
@@ -147,11 +157,21 @@ const registerSocketEvent = () => {
     bookmarkList.push(bookmark);
   });
 
+  // ピンメッセージ保存イベントを受け取ったら実行
+  socket.on("messagePinnedEvent", (msg) => {
+    pinMessageList.push(msg);
+    console.log(pinMessageList)
+  });
+
   // ユーザーブックマークイベントを受け取ったら実行
   socket.on("userBookmarksEvent", (bookmarks) => {
     bookmarkList.splice(0, bookmarkList.length, ...bookmarks); // 既存の配列を新しいブックマークで置き換え
   });
 
+  // ユーザーブックマークイベントを受け取ったら実行
+  socket.on("pinnedMessagesEvent", (msgs) => {
+    pinMessageList.splice(0, msgs.length, ...msgs); // 既存の配列を新しいブックマークで置き換え
+  });
 
   // roomChatListイベントを受け取ったら実行
   socket.on("roomChatListEvent", (receivedCharList) => {
@@ -206,6 +226,7 @@ const registerSocketEvent = () => {
                   <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">{{ userList.filter((user) => user.id == chat.senderId)[0].name + "さん: " + chat.content }}
                     <!-- ブックマークボタン -->
                     <button @click="saveBookmark(chat.id)">ブックマーク</button>
+                    <button @click="pinMessage(chat.id)">ピン留め</button>
                   </li>
                 </ul>
                </div>
@@ -225,7 +246,20 @@ const registerSocketEvent = () => {
             <div id="commentSection" class="max-w-10/12 overflow-y-auto border p-3" style="max-height: 684px;">
               <ul>
                 <li v-for="bookmark in bookmarkList" :key="bookmark.id">
-                  <div v-if="chatList.filter((chat) => chat.id == bookmark.messageId)[0]">{{ userList.filter((user) => user.id == bookmark.userId)[0].name + "さん: " + chatList.filter((chat) => chat.id == bookmark.messageId)[0].content }}
+                  <div v-if="chatList.find((chat) => chat.id == bookmark.messageId)">
+                    {{ userList.find((user) => user.id == bookmark.userId).name + "さん: " + chatList.filter((chat) => chat.id == bookmark.messageId)[0].content }}
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="mt-5 ml-5">
+            <h4>ピン留めメッセージ一覧</h4>
+            <div id="commentSection" class="max-w-10/12 overflow-y-auto border p-3" style="max-height: 684px;">
+              <ul>
+                <li v-for="msg in pinMessageList" :key="msg.id">
+                  <div v-if="chatList.find((chat) => chat.id == msg.messageId)">
+                    {{ userList.filter((user) => user.id == chatList.find((chat) => chat.id == msg.id).senderId)[0].name + "さん: " + chatList.filter((chat) => chat.id == msg.messageId)[0].content }}
                   </div>
                 </li>
               </ul>
@@ -234,7 +268,7 @@ const registerSocketEvent = () => {
         </div>
         <div class="flex justify-center mt-5">
           <textarea variant="outlined" placeholder="投稿文を入力してください" class="pr-0 border-2 border-solid border-gray-300 w-96" v-model="chatContent"></textarea>
-          
+
             <!-- <textarea variant="outlined" placeholder="投稿文を入力してください" class="border-2 border-solid border-gray-400 pr-0 w-full" v-model="chatContent"></textarea> -->
           <div class="mt-2 ml-5">
             <button class="py-2 px-3 bg-gray-500 rounded text-white hover:bg-blue-500 shadow-lg transition-all hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:border-blue-300" @click="onPublish">投稿</button>
