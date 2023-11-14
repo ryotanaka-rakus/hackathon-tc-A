@@ -98,7 +98,7 @@ const onSubmit = () => {
 
 <template>
   <div class="flex justify-center mt-20">
-    <h1 class="text-blue-700 font-bold text-6xl mt-20">ChatApp</h1>
+    <h1 class="text-blue-700 font-bold text-7xl mt-20">ChatApp</h1>
   </div>
   <div class="mt-20 flex justify-center flex-col items-center">
     <div class="flex justify-center">
