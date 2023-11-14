@@ -2,6 +2,29 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+// 特定のルームに関連するピン留めされたメッセージを取得する関数
+async function getPinnedMessages(roomId) {
+  return await prisma.pinnedMessage.findMany({
+    where: {
+      roomId: roomId,
+    },
+  });
+}
+
+// メッセージをピン留めする関数
+async function pinMessage(roomId, messageId) {
+  return await prisma.pinnedMessage.create({
+    data: {
+      room: {
+        connect: { id: roomId },
+      },
+      message: {
+        connect: { id: messageId },
+      },
+    },
+  });
+}
+
 // ブックマークをデータベースに保存する関数
 async function saveBookmark(userId, messageId) {
   try {
@@ -113,7 +136,7 @@ async function getRooms() {
 
 //ルーム選択を受け取り、UserRoomテーブルにUserIDとRoomIDを送信する
 async function addForUsersRooms(userName, roomId) {
-  console.log(userName,roomId)
+  console.log(userName, roomId)
   try {
     // UserテーブルからuserNameに対応するユーザーのIDを取得
     const user = await prisma.User.findFirst({
@@ -171,7 +194,7 @@ async function authenticateUser(username, password) {
   // nameとpasswordが一致する最初のレコードを取得、なかったらnullを返す
   const user = await prisma.User.findFirst({
     where: {
-      OR:[{name:{equals:username}},{password:{equals:password}}]
+      OR: [{ name: { equals: username } }, { password: { equals: password } }]
     },
   });
   if (user && user.password === password) {
@@ -249,10 +272,10 @@ export default (io, socket) => {
     }
   })
 
-   // ユーザID,ルームIDをUsersRoomsテーブルに登録する
-   socket.on("addUserToRoom", async (data) => {
-    const u_name=data.Username
-    const r_Id=data.RoomID
+  // ユーザID,ルームIDをUsersRoomsテーブルに登録する
+  socket.on("addUserToRoom", async (data) => {
+    const u_name = data.Username
+    const r_Id = data.RoomID
     console.log(u_name)
     console.log(r_Id)
     try {
@@ -265,52 +288,52 @@ export default (io, socket) => {
 
   //ログイン認証機能
   socket.on("checkLogin", async (data) => {
-    const username=data.userName
-    const password=data.password
+    const username = data.userName
+    const password = data.password
     // ここでデータベースとの照合処理を実行
-    const isOk = await authenticateUser(username,password);
+    const isOk = await authenticateUser(username, password);
     if (isOk) {
       // ユーザーが見つかり、パスワードが一致する(認証成功)場合
       socket.emit("authenticationResult", true);
-      console.log(username+"さんは認証成功しました");
+      console.log(username + "さんは認証成功しました");
     } else {
       // 認証失敗の場合
       socket.emit("authenticationResult", false);
-      console.log(username+"さんは認証失敗しました");
+      console.log(username + "さんは認証失敗しました");
     }
   });
 
   socket.on("checkNewName", async (data) => {
-    const username=data.userName
-    const password=data.password
+    const username = data.userName
+    const password = data.password
     // ここでデータベースとの照合処理を実行
     const isOkUser = await addUser(username, password);
     if (isOkUser) {
       socket.emit("authAddUser", true);
     } else {
       socket.emit("authAddUser", false);
-      console.log(username+"さんは認証失敗しました");
+      console.log(username + "さんは認証失敗しました");
     }
   });
 
 
-    // メモイベントハンドラ
-    socket.on("memoEvent", async (data) => {
-      try {
-        console.log(data);
+  // メモイベントハンドラ
+  socket.on("memoEvent", async (data) => {
+    try {
+      console.log(data);
 
-        // メモをデータベースに保存する
-        const memo = await saveMemo(data.content, data.userId);
+      // メモをデータベースに保存する
+      const memo = await saveMemo(data.content, data.userId);
 
-        // 保存したメモをリクエストしたクライアントに送信する
-        socket.emit("memoEvent", memo);
-      } catch (error) {
-        // エラーメッセージを送信者にのみ送信する
-        socket.emit("errorEvent", "メモの保存に失敗しました。");
-      }
-    });
+      // 保存したメモをリクエストしたクライアントに送信する
+      socket.emit("memoEvent", memo);
+    } catch (error) {
+      // エラーメッセージを送信者にのみ送信する
+      socket.emit("errorEvent", "メモの保存に失敗しました。");
+    }
+  });
 
-      // ブックマークのイベントハンドラ
+  // ブックマークのイベントハンドラ
   socket.on("saveBookmarkEvent", async ({ userId, messageId }) => {
     try {
       const bookmark = await saveBookmark(userId, messageId);
@@ -330,6 +353,16 @@ export default (io, socket) => {
     }
   });
 
+  // 特定のルームのピン留めされたメッセージを取得
+  socket.on("getPinnedMessagesEvent", async (roomId) => {
+    try {
+      const pinnedMessages = await getPinnedMessages(roomId);
+      socket.emit("pinnedMessagesEvent", pinnedMessages);
+    } catch (error) {
+      socket.emit("errorEvent", "ピン留めされたメッセージの取得に失敗しました。");
+    }
+  });
+
   // ルームのチャット履歴を取得するハンドラ
   socket.on("getRoomChatListEvent", async (roomId) => {
     try {
@@ -341,4 +374,13 @@ export default (io, socket) => {
     }
   });
 
+  // メッセージをピン留めする
+  socket.on("pinMessageEvent", async ({ roomId, messageId }) => {
+    try {
+      const pinned = await pinMessage(roomId, messageId);
+      io.sockets.emit("messagePinnedEvent", pinned);
+    } catch (error) {
+      socket.emit("errorEvent", "メッセージのピン留めに失敗しました。");
+    }
+  });
 }

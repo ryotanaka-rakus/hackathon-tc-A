@@ -98,7 +98,7 @@ const onSubmit = () => {
 
 <template>
   <div class="flex justify-center mt-20">
-    <h1 class="text-blue-700 font-bold text-6xl mt-20">ChatApp</h1>
+    <h1 class="text-blue-700 font-bold text-7xl mt-20">ChatApp</h1>
   </div>
   <div class="mt-20 flex justify-center flex-col items-center">
     <div class="flex justify-center">
@@ -112,8 +112,8 @@ const onSubmit = () => {
   </div>
   <div class="mt-15 flex justify-center ml-0">
     <div class="button-container">
-      <button type="button" @click="loginOrAdd" :class="{ 'active': isLogin, 'inactive': !isLogin }">ログイン</button>
-      <button class="ml-5" type="button" @click="loginOrAdd" :class="{ 'active': !isLogin, 'inactive': isLogin }">新規登録</button>
+      <button class="mt-0.5" type="button" @click="loginOrAdd" :class="{ 'active': isLogin, 'inactive': !isLogin }">ログイン</button>
+      <button class="ml-5 mt-0.5" type="button" @click="loginOrAdd" :class="{ 'active': !isLogin, 'inactive': isLogin }">新規登録</button>
     </div>
     <div>
       <button type="button" @click="onSubmit" class="ml-10 py-3 px-6 bg-blue-500 rounded text-white hover:bg-blue-700 shadow-md transition-all hover:shadow-lg hover:shadow-blue-500/25">送信</button>
