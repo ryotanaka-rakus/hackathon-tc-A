@@ -112,8 +112,8 @@ const onSubmit = () => {
   </div>
   <div class="mt-15 flex justify-center ml-0">
     <div class="button-container">
-      <button type="button" @click="loginOrAdd" :class="{ 'active': isLogin, 'inactive': !isLogin }">ログイン</button>
-      <button class="ml-5" type="button" @click="loginOrAdd" :class="{ 'active': !isLogin, 'inactive': isLogin }">新規登録</button>
+      <button class="mt-0.5" type="button" @click="loginOrAdd" :class="{ 'active': isLogin, 'inactive': !isLogin }">ログイン</button>
+      <button class="ml-5 mt-0.5" type="button" @click="loginOrAdd" :class="{ 'active': !isLogin, 'inactive': isLogin }">新規登録</button>
     </div>
     <div>
       <button type="button" @click="onSubmit" class="ml-10 py-3 px-6 bg-blue-500 rounded text-white hover:bg-blue-700 shadow-md transition-all hover:shadow-lg hover:shadow-blue-500/25">送信</button>

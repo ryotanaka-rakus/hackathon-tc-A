@@ -245,19 +245,19 @@ const formatTimestamp = (timestamp) => {
           <div>
             <div class="mt-5" v-if="chatList.length !== 0">
               <h4>ChatList</h4>
-              <div id="commentSection" class="max-w-10/12 max-h-80 overflow-y-auto border p-3">
+              <div id="commentSection" class="max-w-10/12 max-h-80 overflow-y-auto border p-3" ref="commentSectionRef">
                 <ul>
                   <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">{{ userList.filter((user) => user.id == chat.senderId)[0].name + "さん: " + chat.content }}
                     <!-- ブックマークボタン -->
-                    <button @click="saveBookmark(chat.id)">ブックマーク</button>
-                    <button @click="pinMessage(chat.id)">ピン留め</button>
+                    <button class="py-0.5 px-0.5 bg-gray-400 text-white hover:bg-blue-500" @click="saveBookmark(chat.id)">ブックマーク</button>
+                    <button class="ml-3 py-0.5 px-0.5 bg-gray-400 text-white hover:bg-blue-500" @click="pinMessage(chat.id)">ピン留め</button>
                   </li>
                 </ul>
                </div>
             </div>
             <div class="mt-5" v-if="memoList.length !== 0">
               <h4>MemoList</h4>
-              <div id="commentSection" class="max-w-10/12 max-h-80 overflow-y-auto border p-3">
+              <div id="commentSection" class="max-w-10/12 max-h-80 overflow-y-auto border p-3" ref="commentSectionRef">
                 <ul>
                   <li class="item mt-4" v-for="(memo, i) in memoList" :key="i">{{ memo.content }}</li>
                 </ul>
@@ -267,7 +267,7 @@ const formatTimestamp = (timestamp) => {
           <div class="mt-5 ml-5">
             <!-- ブックマーク一覧 -->
             <h4>ブックマーク一覧</h4>
-            <div id="commentSection" class="max-w-10/12 overflow-y-auto border p-3" style="max-height: 684px;">
+            <div id="commentSection" class="max-w-10/12 overflow-y-auto border p-3 max-h-[684px]" ref="commentSectionRef">
               <ul>
                 <li v-for="bookmark in bookmarkList" :key="bookmark.id">
                   <div v-if="chatList.find((chat) => chat.id == bookmark.messageId)">
@@ -279,7 +279,7 @@ const formatTimestamp = (timestamp) => {
           </div>
           <div class="mt-5 ml-5">
             <h4>ピン留めメッセージ一覧</h4>
-            <div id="commentSection" class="max-w-10/12 overflow-y-auto border p-3" style="max-height: 684px;">
+            <div id="commentSection" class="max-w-10/12 overflow-y-auto border p-3 max-h-[684px]" ref="commentSectionRef">
               <ul>
                 <li v-for="msg in pinMessageList" :key="msg.id">
                   <div v-if="chatList.find((chat) => chat.id == msg.messageId)">
