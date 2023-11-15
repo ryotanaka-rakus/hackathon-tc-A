@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, provide, ref } from "vue"
-import { useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 
 // #region reactive state
 const userName = ref("")
@@ -10,18 +10,21 @@ const userName = ref("")
 provide("userName", userName)
 // #endregion
 
-const route = useRoute();
+const router = useRouter();
 const isUserName = computed(() => {
-  return route.path !== "/";
+  return router.path !== "/";
 });
 
-
+const enterChat = () => {
+  // '/chat' パスに遷移
+  router.push({ name: 'chat' });
+};
 </script>
 
 <template>
   <header>
     <div class="border-b-2 border-gray-500 flex flex-row items-center justify-between">
-      <h1 class="text-blue-700 font-bold text-3xl mb-2 max-w-xl">ChatApp</h1>
+      <h1 class="text-blue-700 font-bold text-3xl mb-2 max-w-xl" @click="enterChat">ChatApp</h1>
       <div class="max-w-3xl text-2xl"><p v-if="isUserName">ユーザー名：{{ userName }}</p></div>
     </div>
   </header>

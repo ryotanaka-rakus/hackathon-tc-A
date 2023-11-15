@@ -2,6 +2,7 @@
 import { inject, ref, reactive, onMounted } from "vue"
 import socketManager from '../socketManager.js'
 import 'tailwindcss/tailwind.css'
+import { useRouter } from "vue-router";
 
 
 // #region global state
@@ -13,6 +14,7 @@ const roomId = 1
 
 // #region local variable
 const socket = socketManager.getInstance()
+const router = useRouter();
 
 // ユーザー一覧をサーバーから取得する
 const fetchUsers = () => {
@@ -302,6 +304,30 @@ const formatTimestamp = (timestamp) => {
   return timestamp.toLocaleString();
 }
 
+const enterChatPost = () => {
+  if (router) {
+    router.push({ name: 'chatpost' });
+  }
+}
+
+const enterMemo = () => {
+  if (router) {
+    router.push({ name: 'memo' });
+  }
+}
+
+const enterBookMark = () => {
+  if (router) {
+    router.push({ name: 'bookmark' });
+  }
+}
+
+const enterPin = () => {
+  if (router) {
+    router.push({ name: 'pin' });
+  }
+}
+
 </script>
 
 <template>
@@ -309,22 +335,21 @@ const formatTimestamp = (timestamp) => {
   <div class="flex">
     <div class="w-64 md:w-72 border-r-2 border-gray-500 p-2 flex flex-col h-auto">
       <div class="flex-grow">
-        <div class="mt-3">
-          オンライン
+        <div class="mt-3 flex flex-col">
           <div>
-            ・ff
+            <h2>チャット別機能</h2>
           </div>
-          <div>
-            ・abcd
+          <div class="mt-5">
+            <button @click="enterChatPost" class="mx-2 py-2 px-3 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded transition-all hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:border-blue-300">チャット</button>
           </div>
-        </div>
-        <div class="mt-5">
-          オフライン
-          <div>
-            ・ああああああ
+          <div class="mt-5">
+            <button @click="enterMemo" class="mx-2 py-2 px-3 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded transition-all hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:border-blue-300">メモ</button>
           </div>
-          <div>
-            ・aaaaaaaa
+          <div class="mt-5">
+            <button @click="enterBookMark" class="mx-2 py-2 px-3 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded transition-all hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:border-blue-300">ブックマーク一覧</button>
+          </div>
+          <div class="mt-5">
+            <button @click="enterPin" class="mx-2 py-2 px-3 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded transition-all hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:border-blue-300">ピン留めメッセージ一覧</button>
           </div>
         </div>
       </div>
@@ -341,14 +366,14 @@ const formatTimestamp = (timestamp) => {
           <div>
             <div class="mt-5" v-if="chatList.length !== 0">
               <h4>チャット</h4>
-              <div id="commentSection" class="max-w-10/12 max-h-60 overflow-y-auto border p-3" ref="commentSectionRef">
+              <div id="commentSection" class="max-w-lg max-h-60 overflow-y-auto border p-3" ref="commentSectionRef">
                 <ul>
                   <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">
                     <div v-if="userList.find((user) => user.id == chat.senderId)">
                       {{ userList.find((user) => user.id == chat.senderId).name + "さん: " + chat.content}}
                       <span class="message-timestamp">{{ formatTimestamp(chat.createdAt) }}</span>
                       <!-- ブックマークボタン -->
-                      <button class="ml-2 file:py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded" @click="saveBookmark(chat.id)">ブックマーク</button>
+                      <button class="ml-2 py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded" @click="saveBookmark(chat.id)">ブックマーク</button>
                       <button class="ml-3 py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded" @click="pinMessage(chat.id)">ピン留め</button>
                       <!-- 「編集」, 「編集完了」, 「編集履歴」　ボタンを追加 -->
                       <button v-if="chat.senderId == userId" @click="showEditTextarea()" style="width: 100px;">編集</button>
@@ -374,7 +399,7 @@ const formatTimestamp = (timestamp) => {
             </div>
             <div class="mt-5" v-if="memoList.length !== 0">
               <h4>メモ</h4>
-              <div id="commentSection" class="max-w-10/12 max-h-60 overflow-y-auto border p-3" ref="commentSectionRef">
+              <div id="commentSection" class="max-w-lg max-h-60 overflow-y-auto border p-3" ref="commentSectionRef">
                 <ul>
                   <li class="item mt-4" v-for="(memo, i) in memoList" :key="i">{{ memo.content }}</li>
                 </ul>
@@ -384,7 +409,7 @@ const formatTimestamp = (timestamp) => {
           <div class="mt-5 ml-5">
             <!-- ブックマーク一覧 -->
             <h4>ブックマーク一覧</h4>
-            <div id="commentSection" class="max-w-10/12 overflow-y-auto border p-3 max-h-[524px]" ref="commentSectionRef">
+            <div id="commentSection" class="max-w-xs overflow-y-auto border p-3 max-h-[524px]" ref="commentSectionRef">
               <ul>
                 <li v-for="bookmark in bookmarkList" :key="bookmark.id">
                   <div v-if="chatList.find((chat) => chat.id == bookmark.messageId)">
@@ -396,7 +421,7 @@ const formatTimestamp = (timestamp) => {
           </div>
           <div class="mt-5 ml-5">
             <h4>ピン留めメッセージ一覧</h4>
-            <div id="commentSection" class="max-w-10/12 overflow-y-auto border p-3 max-h-[524px]" ref="commentSectionRef">
+            <div id="commentSection" class="max-w-xs overflow-y-auto border p-3 max-h-[524px]" ref="commentSectionRef">
               <ul>
                 <li v-for="msg in pinMessageList" :key="msg.id">
                   <div v-if="chatList.find((chat) => chat.id == msg.messageId)">
