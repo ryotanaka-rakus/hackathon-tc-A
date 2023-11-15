@@ -298,7 +298,7 @@ const registerSocketEvent = () => {
 };
 
 const formatTimestamp = (timestamp) => {
-  timestamp = new Date();
+  timestamp = new Date(timestamp);
   return timestamp.toLocaleString();
 }
 
@@ -345,7 +345,8 @@ const formatTimestamp = (timestamp) => {
                 <ul>
                   <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">
                     <div v-if="userList.find((user) => user.id == chat.senderId)">
-                      {{ userList.find((user) => user.id == chat.senderId).name + "さん: " + chat.content }}
+                      {{ userList.find((user) => user.id == chat.senderId).name + "さん: " + chat.content}}
+                      <span class="message-timestamp">{{ formatTimestamp(chat.createdAt) }}</span>
                       <!-- ブックマークボタン -->
                       <button class="ml-2 file:py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded" @click="saveBookmark(chat.id)">ブックマーク</button>
                       <button class="ml-3 py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded" @click="pinMessage(chat.id)">ピン留め</button>
@@ -358,7 +359,10 @@ const formatTimestamp = (timestamp) => {
                     <div v-if="historyFlag[chat.id]">
                       <div class="item mt-4" v-for="(edit, j) in editList.filter((el) => el[0] && el[0].messageId == chat.id)" :key="j">
                         <li class="item mt-4" v-for="(e, k) in edit" :key="k">
-                          {{"編集履歴" + (k+1) + ':' + e.previousContent + "更新日時 :" + e.createdAt}}
+                          {{"編集履歴" + (k+1) + ':' + e.previousContent }}
+                          <span class="message-timestamp">
+                            {{ formatTimestamp(e.createdAt) }} 
+                          </span>
                         </li>
                       </div>
                     </div>
