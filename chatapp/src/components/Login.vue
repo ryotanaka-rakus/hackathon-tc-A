@@ -37,7 +37,8 @@ const enterVerified = (username) => {
   //チャット画面へ遷移
   router.push({ name: "roomSelect" })
   // 入室メッセージを送信
-  socket.emit("enterEvent", userName.value + "さんが入室しました")
+  //socket.emit("enterEvent", userName.value + "さんが入室しました")
+  socket.emit("enterEvent", username)
 }
 
 

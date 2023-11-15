@@ -102,6 +102,96 @@ async function saveMessage(content, userId, roomId) {
   }
 }
 
+// メッセージをデータベースから取得する関数
+async function getMessage(message_id) 
+{
+  try 
+  {
+    return await prisma.message.findUnique({
+      where: {
+        id : message_id, // 特定のメッセージのみ取得
+      },
+      select : {
+        id       : true,
+        roomId   : true,
+        senderId : true,
+        content  : true,
+        createdAt: true
+      }
+    });
+  } 
+  catch (error) 
+  {
+    console.error('Error getting message:', error);
+    throw new Error('Message getting failed');
+  }
+}
+
+// データベースに登録されているメッセージを編集後のメッセージに更新する関数
+async function updateMessage(message_id, edit_content) 
+{
+  try 
+  {
+    return await prisma.message.update({
+      where: {
+        id : message_id, // 特定のメッセージの編集履歴のみを取得
+      },
+      data: {
+        content : edit_content, // 元のメッセージを編集後のメッセージに更新
+      },
+    });
+  } 
+  catch (error) 
+  {
+    console.error('Error updating message:', error);
+    throw new Error('Message updating failed');
+  }
+}
+
+// 編集前のメッセージをデータベースに登録する関数
+async function saveEditMessage(message_id, previous_content) 
+{
+  try 
+  {
+    await prisma.messageEditHistory.create({
+      data: {
+        messageId       : message_id,       // 対となる Message データの id
+        previousContent : previous_content, // 編集履歴
+      },
+    });
+  } 
+  catch (error) 
+  {
+    console.error('Error saving message:', error);
+    throw new Error('Message saving failed');
+  }
+}
+
+// 編集履歴情報を追加したメッセージをデータベースから取得する関数
+async function getEditMessage(message_id) 
+{
+  try 
+  {
+    // messageEditHistoryフィールドのリストを返却する
+    return await prisma.messageEditHistory.findMany({
+      where: {
+        messageId : message_id // messageIdカラムがmessage_idと一致するデータのみ取得
+      },
+      select : {
+        id              : true, // 編集履歴のid
+        messageId       : true, // 対となる Message データの id
+        previousContent : true, // 編集履歴
+        createdAt       : true  // 更新日時
+      }
+    });
+  } 
+  catch (error) 
+  {
+    console.error('Error edit message:', error);
+    throw new Error('Message edit failed');
+  }
+}
+
 // ユーザー一覧を取得する関数
 async function getUsers() {
   try {
@@ -208,9 +298,18 @@ async function authenticateUser(username, password) {
 
 export default (io, socket) => {
   // 入室メッセージをクライアントに送信する
-  socket.on("enterEvent", (data) => {
+  socket.on("enterEvent", async(data) => {
     console.log("入室: " + data)
-    socket.broadcast.emit("enterEvent", data)
+    socket.broadcast.emit("enterEvent", data + "さんが入室しました")
+    try {
+      const users = await getUsers();
+
+      // ユーザー一覧をリクエストしたクライアントに送信する
+      socket.emit("usersListEvent", users);
+    } catch (error) {
+      // エラーメッセージを送信者にのみ送信する
+      socket.emit("errorEvent", "ユーザー情報の取得に失敗しました。");
+    }
   })
 
   // 退室メッセージをクライアントに送信する
@@ -232,6 +331,38 @@ export default (io, socket) => {
     } catch (error) {
       // エラーメッセージを送信者にのみ送信する
       socket.emit("errorEvent", "メッセージの保存に失敗しました。");
+    }
+  })
+
+  // 編集メッセージを送信する
+  socket.on("editEvent", async (data) => 
+  {
+    try 
+    {
+      console.log("data.messageId")
+
+      // 編集前のメッセージをMessageテーブルから取得し、MessageEditHistoryテーブルに登録
+      const previous_content = await getMessage(data.messageId);
+      await saveEditMessage(data.messageId, previous_content.content);
+      
+      // 編集前のメッセージをMessageEditHistoryテーブルから取得 (編集履歴のリストを返す)
+      const edit_message = await getEditMessage(data.messageId);
+      console.log("編集したメッセージの内容:", edit_message);
+
+      // Messageテーブルに登録されている編集前のメッセージを編集後のメッセージに変更
+      const message = await updateMessage(data.messageId, data.editContent)
+      console.log("メッセージの内容:", message);
+
+      // 全ての編集履歴を保有したメッセージを全クライアントに送信
+      io.sockets.emit("editEvent", {
+        message      : message,
+        edit_message : edit_message
+      });
+    }
+    catch (error) 
+    {
+      // エラーメッセージを送信者にのみ送信
+      socket.emit("errorEvent", "編集メッセージの保存に失敗しました。");
     }
   })
 
@@ -371,6 +502,22 @@ export default (io, socket) => {
       socket.emit("roomChatListEvent", chatList);
     } catch (error) {
       socket.emit("errorEvent", "ブックマークの取得に失敗しました。");
+    }
+  });
+
+  // ルームのチャットの編集履歴を取得するハンドラ
+  socket.on("getRoomEditListEvent", async (roomId) => {
+    try {
+      console.log("ルームの編集履歴を取得");
+      const chatList = await getRoomChatList(roomId);
+      const editList = [];
+      for (const chat of chatList) {
+        editList.unshift(await getEditMessage(chat.id));
+      }
+      console.log(editList)
+      socket.emit("roomEditListEvent", editList);
+    } catch (error) {
+      socket.emit("errorEvent", "編集履歴の取得に失敗しました。");
     }
   });
 

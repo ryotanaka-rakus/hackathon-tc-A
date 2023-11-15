@@ -22,12 +22,20 @@ const fetchUsers = () => {
 const fetchChatList = () => {
   socket.emit("getRoomChatListEvent")
 }
+
+const fetchEditList = () => {
+  socket.emit("getRoomEditListEvent")
+}
 // #endregion
 
 // #region reactive variable
 const chatContent = ref("")
+const editContent = ref("") // 編集メッセージ
+const editAreaFlag = ref(false) // 編集エリアを表示するか示す boolean 値
 const chatList = reactive([])
+const editList = reactive([]) // 編集履歴一覧
 const memoList = reactive([])
+const historyFlag = reactive([]) // 編集履歴が表示するか示す boolean 値
 const bookmarkList = reactive([]) // ブックマーク一覧を格納するためのリアクティブな配列
 const pinMessageList = reactive([]) // ブックマーク一覧を格納するためのリアクティブな配列
 const userList = reactive([]) // ユーザー一覧を格納するためのリアクティブな配列
@@ -40,6 +48,7 @@ onMounted(() => {
   fetchUserBookmarks()
   fetchPinnedMessages()
   fetchChatList()
+  fetchEditList()
 })
 // #endregion
 
@@ -65,6 +74,32 @@ const onPublish = () => {
   }
   else {
     alert("テキストを入力してください。")
+  }
+}
+
+// 編集メッセージをサーバーに送信する処理
+const onEdit = (messageId) => 
+{
+  // 編集メッセージが入力されている場合
+  if (editContent.value.trim()) 
+  {
+    const editData = {
+      messageId,
+      editContent : editContent.value,
+    }
+    socket.emit("editEvent", editData);
+
+    // 入力欄を初期化
+    editContent.value = ""
+
+    // 編集エリアを非表示にする
+    showEditTextarea()
+  }
+
+  // 編集メッセージが入力されていない場合
+  else 
+  {
+    alert("編集テキストを入力してください。")
   }
 }
 
@@ -115,6 +150,29 @@ const fetchUserBookmarks = () => {
 const fetchPinnedMessages = () => {
   socket.emit("getPinnedMessagesEvent", roomId)
 }
+
+// 編集履歴を表示する or 編集履歴を非表示にする関数
+const editHistoryVisibility = (messageId) => 
+{
+  console.log("editHistoryVisibility :", historyFlag[messageId])
+
+  // 状態を反転させる (表示 → 非表示 or 非表示 → 表示)
+  historyFlag[messageId] = !historyFlag[messageId];
+};
+
+// 編集エリアを表示 or 編集エリアを非表示にする関数
+const showEditTextarea = () =>
+{
+  if (editAreaFlag.value == false)
+  {
+    editAreaFlag.value = true;
+  }
+  else
+  {
+    editAreaFlag.value = false;
+  }
+  console.log("editAreaFlag", editAreaFlag.value)
+}
 // #endregion
 
 // #region socket event handler
@@ -163,6 +221,39 @@ const registerSocketEvent = () => {
 
   })
 
+  // 編集イベントを受け取ったら実行
+  socket.on("editEvent", (data_list) => 
+  {
+    // 既存のデータを探索
+    const targetMessageId   = data_list.edit_message[0].messageId;
+    const existingDataIndex = chatList.findIndex(data => data.id === targetMessageId);
+    console.log("targetMessageId:", targetMessageId);
+    console.log("existingDataIndex:", existingDataIndex);
+      
+    // chatList に既存のデータが見つかった場合
+    if (existingDataIndex !== -1) 
+    {
+      // 編集前のメッセージを編集後のメッセージに変更
+      chatList[existingDataIndex] = data_list.message;
+
+      // 編集前のメッセージを編集履歴に追加
+      const existingEditDataIndex = editList.findIndex(data => data[0] && data[0].messageId === targetMessageId);
+
+      // 編集履歴が存在する場合
+      if (existingEditDataIndex !== -1) 
+      {
+        editList[existingEditDataIndex] = data_list.edit_message
+      }
+      else
+      {
+        editList.unshift(data_list.edit_message)
+      }
+      
+      // 最初は編集履歴を非表示にしておく
+      historyFlag.unshift(false)
+    } 
+  })
+
   // メモイベントを受け取ったら実行
   socket.on("memoEvent", onReceiveMemo);
 
@@ -200,7 +291,12 @@ const registerSocketEvent = () => {
     chatList.splice(0, chatList.length, ...receivedCharList)
   });
 
+  // roomEditListイベントを受け取ったら実行
+  socket.on("roomEditListEvent", (receivedEditList) => {
+    editList.splice(0, chatList.length, ...receivedEditList)
+  });
 };
+
 const formatTimestamp = (timestamp) => {
   timestamp = new Date();
   return timestamp.toLocaleString();
@@ -247,12 +343,29 @@ const formatTimestamp = (timestamp) => {
               <h4>チャット</h4>
               <div id="commentSection" class="max-w-10/12 max-h-60 overflow-y-auto border p-3" ref="commentSectionRef">
                 <ul>
-                  <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">{{ userList.filter((user) => user.id == chat.senderId)[0].name + "さん: " + chat.content }}
-                    <!-- ブックマークボタン -->
-                    <button class="ml-2 file:py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded" @click="saveBookmark(chat.id)">ブックマーク</button>
-                    <button class="ml-3 py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded" @click="pinMessage(chat.id)">ピン留め</button>
+                  <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">
+                    <div v-if="userList.find((user) => user.id == chat.senderId)">
+                      {{ userList.find((user) => user.id == chat.senderId).name + "さん: " + chat.content }}
+                      <!-- ブックマークボタン -->
+                      <button class="ml-2 file:py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded" @click="saveBookmark(chat.id)">ブックマーク</button>
+                      <button class="ml-3 py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded" @click="pinMessage(chat.id)">ピン留め</button>
+                      <!-- 「編集」, 「編集完了」, 「編集履歴」　ボタンを追加 -->
+                      <button v-if="chat.senderId == userId" @click="showEditTextarea()" style="width: 100px;">編集</button>
+                      <button v-if="chat.senderId == userId" v-bind:value="chat.id" @click="onEdit(chat.id)" style="width: 100px;">編集完了</button>
+                      <button v-bind:value="chat.id" @click="editHistoryVisibility(chat.id)" style="width: 100px;">編集履歴</button>
+                    </div>
+                    <!-- 編集履歴を表示 -->
+                    <div v-if="historyFlag[chat.id]">
+                      <div class="item mt-4" v-for="(edit, j) in editList.filter((el) => el[0] && el[0].messageId == chat.id)" :key="j">
+                        <li class="item mt-4" v-for="(e, k) in edit" :key="k">
+                          {{"編集履歴" + (k+1) + ':' + e.previousContent + "更新日時 :" + e.createdAt}}
+                        </li>
+                      </div>
+                    </div>
                   </li>
                 </ul>
+                <!-- メッセージを編集する際に使用するテキストエリアを追加 -->
+                <textarea v-if="editAreaFlag" variant="outlined" placeholder="編集文を入力してください" rows="4" class="area" v-model="editContent"></textarea>
                </div>
             </div>
             <div class="mt-5" v-if="memoList.length !== 0">
@@ -301,3 +414,12 @@ const formatTimestamp = (timestamp) => {
     </div>
   </div>
 </template>
+
+<style scoped>
+
+.message-timestamp {
+  font-size: 0.8em;
+  color: #777;
+  margin-left: 10px;
+}
+</style>
