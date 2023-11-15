@@ -3,6 +3,7 @@ import { inject, ref, reactive, onMounted } from "vue"
 import socketManager from '../socketManager.js'
 import 'tailwindcss/tailwind.css'
 import { useRouter } from "vue-router";
+import Book from './Book.vue'
 
 
 // #region global state
@@ -304,27 +305,27 @@ const formatTimestamp = (timestamp) => {
   return timestamp.toLocaleString();
 }
 
-const enterChatPost = () => {
+const enterPostBook = () => {
   if (router) {
-    router.push({ name: 'chatpost' });
+    router.push({ name: 'postbook' });
   }
 }
 
-const enterMemo = () => {
+const enterPostPin = () => {
   if (router) {
-    router.push({ name: 'memo' });
+    router.push({ name: 'postpin' });
   }
 }
 
-const enterBookMark = () => {
+const enterMemoBook = () => {
   if (router) {
-    router.push({ name: 'bookmark' });
+    router.push({ name: 'memobook' });
   }
 }
 
-const enterPin = () => {
+const enterMemoPin = () => {
   if (router) {
-    router.push({ name: 'pin' });
+    router.push({ name: 'memopin' });
   }
 }
 
@@ -340,16 +341,16 @@ const enterPin = () => {
             <h2>チャット別機能</h2>
           </div>
           <div class="mt-5">
-            <button @click="enterChatPost" class="mx-2 py-2 px-3 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded transition-all hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:border-blue-300">チャット</button>
+            <button @click="enterPostBook" class="mx-2 py-2 px-3 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded transition-all hover:shadow-lg hover:shadow-blue-500/25">チャット&ブックマーク一覧</button>
           </div>
           <div class="mt-5">
-            <button @click="enterMemo" class="mx-2 py-2 px-3 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded transition-all hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:border-blue-300">メモ</button>
+            <button @click="enterPostPin" class="mx-2 py-2 px-3 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded transition-all hover:shadow-lg hover:shadow-blue-500/25">チャット&ピン留めメッセージ一覧</button>
           </div>
           <div class="mt-5">
-            <button @click="enterBookMark" class="mx-2 py-2 px-3 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded transition-all hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:border-blue-300">ブックマーク一覧</button>
+            <button @click="enterMemoBook" class="mx-2 py-2 px-3 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded transition-all hover:shadow-lg hover:shadow-blue-500/25">メモ&ブックマーク一覧</button>
           </div>
           <div class="mt-5">
-            <button @click="enterPin" class="mx-2 py-2 px-3 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded transition-all hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:border-blue-300">ピン留めメッセージ一覧</button>
+            <button @click="enterMemoPin" class="mx-2 py-2 px-3 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded transition-all hover:shadow-lg hover:shadow-blue-500/25">メモ&ピン留めメッセージ一覧</button>
           </div>
         </div>
       </div>
@@ -376,9 +377,10 @@ const enterPin = () => {
                       <button class="ml-2 py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded" @click="saveBookmark(chat.id)">ブックマーク</button>
                       <button class="ml-3 py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded" @click="pinMessage(chat.id)">ピン留め</button>
                       <!-- 「編集」, 「編集完了」, 「編集履歴」　ボタンを追加 -->
-                      <button v-if="chat.senderId == userId" @click="showEditTextarea()" style="width: 100px;">編集</button>
-                      <button v-if="chat.senderId == userId" v-bind:value="chat.id" @click="onEdit(chat.id)" style="width: 100px;">編集完了</button>
-                      <button v-bind:value="chat.id" @click="editHistoryVisibility(chat.id)" style="width: 100px;">編集履歴</button>
+                      <br>
+                      <button v-if="chat.senderId == userId" @click="showEditTextarea()" class="ml-3 py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded">編集</button>
+                      <button v-if="chat.senderId == userId" v-bind:value="chat.id" @click="onEdit(chat.id)" class="ml-3 py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded">編集完了</button>
+                      <button v-bind:value="chat.id" @click="editHistoryVisibility(chat.id)" class="ml-3 py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded">編集履歴</button>
                     </div>
                     <!-- 編集履歴を表示 -->
                     <div v-if="historyFlag[chat.id]">
@@ -406,9 +408,9 @@ const enterPin = () => {
               </div>
             </div>
           </div>
-          <div class="mt-5 ml-5">
+          <!-- <div class="mt-5 ml-5"> -->
             <!-- ブックマーク一覧 -->
-            <h4>ブックマーク一覧</h4>
+            <!-- <h4>ブックマーク一覧</h4>
             <div id="commentSection" class="max-w-xs overflow-y-auto border p-3 max-h-[524px]" ref="commentSectionRef">
               <ul>
                 <li v-for="bookmark in bookmarkList" :key="bookmark.id">
@@ -418,7 +420,8 @@ const enterPin = () => {
                 </li>
               </ul>
             </div>
-          </div>
+          </div> -->
+          <Book />
           <div class="mt-5 ml-5">
             <h4>ピン留めメッセージ一覧</h4>
             <div id="commentSection" class="max-w-xs overflow-y-auto border p-3 max-h-[524px]" ref="commentSectionRef">
@@ -435,8 +438,8 @@ const enterPin = () => {
         <div class="flex justify-center mt-5">
           <textarea variant="outlined" placeholder="投稿文を入力してください" class="pr-0 border-2 border-solid border-gray-300 w-96" v-model="chatContent"></textarea>
           <div class="mt-2 ml-5">
-            <button class="py-2 px-3 bg-gray-500 rounded text-white hover:bg-blue-500 shadow-lg transition-all hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:border-blue-300" @click="onPublish">投稿</button>
-            <button class="ml-5 py-2 px-3 bg-gray-500 rounded text-white hover:bg-blue-500 shadow-lg transition-all hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:border-blue-300" @click="onMemo">メモ</button>
+            <button class="py-2 px-3 bg-gray-500 rounded text-white hover:bg-blue-500 shadow-lg transition-all hover:shadow-lg hover:shadow-blue-500/25" @click="onPublish">投稿</button>
+            <button class="ml-5 py-2 px-3 bg-gray-500 rounded text-white hover:bg-blue-500 shadow-lg transition-all hover:shadow-lg hover:shadow-blue-500/25" @click="onMemo">メモ</button>
           </div>
         </div>
         <div class="flex justify-center mt-5">
@@ -446,12 +449,3 @@ const enterPin = () => {
     </div>
   </div>
 </template>
-
-<style scoped>
-
-.message-timestamp {
-  font-size: 0.8em;
-  color: #777;
-  margin-left: 10px;
-}
-</style>
