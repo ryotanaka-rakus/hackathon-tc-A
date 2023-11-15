@@ -439,6 +439,9 @@ const enterPin = () => {
             <button class="ml-5 py-2 px-3 bg-gray-500 rounded text-white hover:bg-blue-500 shadow-lg transition-all hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:border-blue-300" @click="onMemo">メモ</button>
           </div>
         </div>
+        <div class="flex justify-center mt-5">
+          <textarea v-if="editAreaFlag" variant="outlined" placeholder="編集文を入力してください" rows="4" class="pr-0 border-2 border-solid border-gray-300 w-96" v-model="editContent"></textarea>
+        </div>
       </div>
     </div>
   </div>

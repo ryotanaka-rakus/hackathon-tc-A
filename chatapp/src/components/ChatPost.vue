@@ -16,7 +16,6 @@ const roomId = 1
 const socket = socketManager.getInstance()
 const router = useRouter();
 
-
 // ユーザー一覧をサーバーから取得する
 const fetchUsers = () => {
   socket.emit("getUsersEvent"); // サーバにユーザー一覧を要求する
@@ -25,12 +24,20 @@ const fetchUsers = () => {
 const fetchChatList = () => {
   socket.emit("getRoomChatListEvent")
 }
+
+const fetchEditList = () => {
+  socket.emit("getRoomEditListEvent")
+}
 // #endregion
 
 // #region reactive variable
 const chatContent = ref("")
+const editContent = ref("") // 編集メッセージ
+const editAreaFlag = ref(false) // 編集エリアを表示するか示す boolean 値
 const chatList = reactive([])
+const editList = reactive([]) // 編集履歴一覧
 const memoList = reactive([])
+const historyFlag = reactive([]) // 編集履歴が表示するか示す boolean 値
 const bookmarkList = reactive([]) // ブックマーク一覧を格納するためのリアクティブな配列
 const pinMessageList = reactive([]) // ブックマーク一覧を格納するためのリアクティブな配列
 const userList = reactive([]) // ユーザー一覧を格納するためのリアクティブな配列
@@ -43,6 +50,7 @@ onMounted(() => {
   fetchUserBookmarks()
   fetchPinnedMessages()
   fetchChatList()
+  fetchEditList()
 })
 // #endregion
 
@@ -68,6 +76,32 @@ const onPublish = () => {
   }
   else {
     alert("テキストを入力してください。")
+  }
+}
+
+// 編集メッセージをサーバーに送信する処理
+const onEdit = (messageId) => 
+{
+  // 編集メッセージが入力されている場合
+  if (editContent.value.trim()) 
+  {
+    const editData = {
+      messageId,
+      editContent : editContent.value,
+    }
+    socket.emit("editEvent", editData);
+
+    // 入力欄を初期化
+    editContent.value = ""
+
+    // 編集エリアを非表示にする
+    showEditTextarea()
+  }
+
+  // 編集メッセージが入力されていない場合
+  else 
+  {
+    alert("編集テキストを入力してください。")
   }
 }
 
@@ -118,6 +152,29 @@ const fetchUserBookmarks = () => {
 const fetchPinnedMessages = () => {
   socket.emit("getPinnedMessagesEvent", roomId)
 }
+
+// 編集履歴を表示する or 編集履歴を非表示にする関数
+const editHistoryVisibility = (messageId) => 
+{
+  console.log("editHistoryVisibility :", historyFlag[messageId])
+
+  // 状態を反転させる (表示 → 非表示 or 非表示 → 表示)
+  historyFlag[messageId] = !historyFlag[messageId];
+};
+
+// 編集エリアを表示 or 編集エリアを非表示にする関数
+const showEditTextarea = () =>
+{
+  if (editAreaFlag.value == false)
+  {
+    editAreaFlag.value = true;
+  }
+  else
+  {
+    editAreaFlag.value = false;
+  }
+  console.log("editAreaFlag", editAreaFlag.value)
+}
 // #endregion
 
 // #region socket event handler
@@ -166,6 +223,39 @@ const registerSocketEvent = () => {
 
   })
 
+  // 編集イベントを受け取ったら実行
+  socket.on("editEvent", (data_list) => 
+  {
+    // 既存のデータを探索
+    const targetMessageId   = data_list.edit_message[0].messageId;
+    const existingDataIndex = chatList.findIndex(data => data.id === targetMessageId);
+    console.log("targetMessageId:", targetMessageId);
+    console.log("existingDataIndex:", existingDataIndex);
+      
+    // chatList に既存のデータが見つかった場合
+    if (existingDataIndex !== -1) 
+    {
+      // 編集前のメッセージを編集後のメッセージに変更
+      chatList[existingDataIndex] = data_list.message;
+
+      // 編集前のメッセージを編集履歴に追加
+      const existingEditDataIndex = editList.findIndex(data => data[0] && data[0].messageId === targetMessageId);
+
+      // 編集履歴が存在する場合
+      if (existingEditDataIndex !== -1) 
+      {
+        editList[existingEditDataIndex] = data_list.edit_message
+      }
+      else
+      {
+        editList.unshift(data_list.edit_message)
+      }
+      
+      // 最初は編集履歴を非表示にしておく
+      historyFlag.unshift(false)
+    } 
+  })
+
   // メモイベントを受け取ったら実行
   socket.on("memoEvent", onReceiveMemo);
 
@@ -203,9 +293,14 @@ const registerSocketEvent = () => {
     chatList.splice(0, chatList.length, ...receivedCharList)
   });
 
+  // roomEditListイベントを受け取ったら実行
+  socket.on("roomEditListEvent", (receivedEditList) => {
+    editList.splice(0, chatList.length, ...receivedEditList)
+  });
 };
+
 const formatTimestamp = (timestamp) => {
-  timestamp = new Date();
+  timestamp = new Date(timestamp);
   return timestamp.toLocaleString();
 }
 
@@ -235,9 +330,8 @@ const enterPin = () => {
 
 </script>
 
-
 <template>
- <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <div class="flex">
     <div class="w-64 md:w-72 border-r-2 border-gray-500 p-2 flex flex-col h-auto">
       <div class="flex-grow">
@@ -266,25 +360,88 @@ const enterPin = () => {
       </div>
     </div>
 
-    <div class="flex justify-center">
-      <div class="mt-5" v-if="chatList.length !== 0">
-        <h4>チャット</h4>
-        <div id="commentSection" class="max-w-100 max-h-60 overflow-y-auto border p-3" ref="commentSectionRef">
-          <ul>
-            <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">{{ userList.filter((user) => user.id == chat.senderId)[0].name + "さん: " + chat.content }}
-                <!-- ブックマークボタン -->
-              <button class="ml-2 file:py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded" @click="saveBookmark(chat.id)">ブックマーク</button>
-              <button class="ml-3 py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded" @click="pinMessage(chat.id)">ピン留め</button>
-            </li>
-          </ul>
+    <div class="flex-1 p-3">
+      <div class="my-5 ">
+        <div class="flex justify-center">
+          <div>
+            <div class="mt-5" v-if="chatList.length !== 0">
+              <h4>チャット</h4>
+              <div id="commentSection" class="max-w-lg max-h-60 overflow-y-auto border p-3" ref="commentSectionRef">
+                <ul>
+                  <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">
+                    <div v-if="userList.find((user) => user.id == chat.senderId)">
+                      {{ userList.find((user) => user.id == chat.senderId).name + "さん: " + chat.content}}
+                      <span class="message-timestamp">{{ formatTimestamp(chat.createdAt) }}</span>
+                      <!-- ブックマークボタン -->
+                      <button class="ml-2 py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded" @click="saveBookmark(chat.id)">ブックマーク</button>
+                      <button class="ml-3 py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded" @click="pinMessage(chat.id)">ピン留め</button>
+                      <!-- 「編集」, 「編集完了」, 「編集履歴」　ボタンを追加 -->
+                      <button v-if="chat.senderId == userId" @click="showEditTextarea()" style="width: 100px;">編集</button>
+                      <button v-if="chat.senderId == userId" v-bind:value="chat.id" @click="onEdit(chat.id)" style="width: 100px;">編集完了</button>
+                      <button v-bind:value="chat.id" @click="editHistoryVisibility(chat.id)" style="width: 100px;">編集履歴</button>
+                    </div>
+                    <!-- 編集履歴を表示 -->
+                    <div v-if="historyFlag[chat.id]">
+                      <div class="item mt-4" v-for="(edit, j) in editList.filter((el) => el[0] && el[0].messageId == chat.id)" :key="j">
+                        <li class="item mt-4" v-for="(e, k) in edit" :key="k">
+                          {{"編集履歴" + (k+1) + ':' + e.previousContent }}
+                          <span class="message-timestamp">
+                            {{ formatTimestamp(e.createdAt) }} 
+                          </span>
+                        </li>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+                <!-- メッセージを編集する際に使用するテキストエリアを追加 -->
+                <textarea v-if="editAreaFlag" variant="outlined" placeholder="編集文を入力してください" rows="4" class="area" v-model="editContent"></textarea>
+               </div>
+            </div>
+            <div class="mt-5" v-if="memoList.length !== 0">
+              <h4>メモ</h4>
+              <div id="commentSection" class="max-w-lg max-h-60 overflow-y-auto border p-3" ref="commentSectionRef">
+                <ul>
+                  <li class="item mt-4" v-for="(memo, i) in memoList" :key="i">{{ memo.content }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="mt-5 ml-5">
+            <!-- ブックマーク一覧 -->
+            <h4>ブックマーク一覧</h4>
+            <div id="commentSection" class="max-w-xs overflow-y-auto border p-3 max-h-[524px]" ref="commentSectionRef">
+              <ul>
+                <li v-for="bookmark in bookmarkList" :key="bookmark.id">
+                  <div v-if="chatList.find((chat) => chat.id == bookmark.messageId)">
+                    {{ userList.find((user) => user.id == bookmark.userId).name + "さん: " + chatList.filter((chat) => chat.id == bookmark.messageId)[0].content }}
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="mt-5 ml-5">
+            <h4>ピン留めメッセージ一覧</h4>
+            <div id="commentSection" class="max-w-xs overflow-y-auto border p-3 max-h-[524px]" ref="commentSectionRef">
+              <ul>
+                <li v-for="msg in pinMessageList" :key="msg.id">
+                  <div v-if="chatList.find((chat) => chat.id == msg.messageId)">
+                    {{ userList.filter((user) => user.id == chatList.find((chat) => chat.id == msg.id).senderId)[0].name + "さん: " + chatList.filter((chat) => chat.id == msg.messageId)[0].content }}
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-    <div class="flex justify-center mt-5">
-      <textarea variant="outlined" placeholder="投稿文を入力してください" class="pr-0 border-2 border-solid border-gray-300 w-96" v-model="chatContent"></textarea>
-      <div class="mt-2 ml-5">
-        <button class="py-2 px-3 bg-gray-500 rounded text-white hover:bg-blue-500 shadow-lg transition-all hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:border-blue-300" @click="onPublish">投稿</button>
-        <button class="ml-5 py-2 px-3 bg-gray-500 rounded text-white hover:bg-blue-500 shadow-lg transition-all hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:border-blue-300" @click="onMemo">メモ</button>
+        <div class="flex justify-center mt-5">
+          <textarea variant="outlined" placeholder="投稿文を入力してください" class="pr-0 border-2 border-solid border-gray-300 w-96" v-model="chatContent"></textarea>
+          <div class="mt-2 ml-5">
+            <button class="py-2 px-3 bg-gray-500 rounded text-white hover:bg-blue-500 shadow-lg transition-all hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:border-blue-300" @click="onPublish">投稿</button>
+            <button class="ml-5 py-2 px-3 bg-gray-500 rounded text-white hover:bg-blue-500 shadow-lg transition-all hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:border-blue-300" @click="onMemo">メモ</button>
+          </div>
+        </div>
+        <div class="flex justify-center mt-5">
+          <textarea v-if="editAreaFlag" variant="outlined" placeholder="編集文を入力してください" rows="4" class="pr-0 border-2 border-solid border-gray-300 w-96" v-model="editContent"></textarea>
+        </div>
       </div>
     </div>
   </div>
