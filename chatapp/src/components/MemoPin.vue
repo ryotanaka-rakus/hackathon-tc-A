@@ -5,6 +5,8 @@ import 'tailwindcss/tailwind.css'
 import { useRouter } from "vue-router";
 import Memo from './ListMemo.vue'
 import Pin from './ListPin.vue'
+import Fun from './Listfunction.vue'
+import Btn from './ListButtonMemo.vue'
 
 // #region global state
 const userName = inject("userName")
@@ -332,35 +334,8 @@ const enterMemoPin = () => {
 </script>
 
 <template>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <div class="flex">
-    <div class="w-64 md:w-72 border-r-2 border-gray-500 p-2 flex flex-col h-auto">
-      <div class="flex-grow">
-        <div class="mt-3 flex flex-col">
-          <div>
-            <h2>チャット別機能</h2>
-          </div>
-          <div class="mt-5">
-            <button @click="enterPostBook" class="mx-2 py-2 px-3 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded transition-all hover:shadow-lg hover:shadow-blue-500/25">チャット&ブックマーク一覧</button>
-          </div>
-          <div class="mt-5">
-            <button @click="enterPostPin" class="mx-2 py-2 px-3 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded transition-all hover:shadow-lg hover:shadow-blue-500/25">チャット&ピン留めメッセージ一覧</button>
-          </div>
-          <div class="mt-5">
-            <button @click="enterMemoBook" class="mx-2 py-2 px-3 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded transition-all hover:shadow-lg hover:shadow-blue-500/25">メモ&ブックマーク一覧</button>
-          </div>
-          <div class="mt-5">
-            <button @click="enterMemoPin" class="mx-2 py-2 px-3 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded transition-all hover:shadow-lg hover:shadow-blue-500/25">メモ&ピン留めメッセージ一覧</button>
-          </div>
-        </div>
-      </div>
-      <div class="">
-        <router-link to="/" class="link">
-          <button type="button" class="py-2 px-4 bg-gray-500 rounded text-white hover:bg-gray-700 shadow-md transition-all hover:shadow-lg hover:shadow-gray-500/25" @click="onExit">退室する</button>
-        </router-link>
-      </div>
-    </div>
-
+    <Fun />
     <div class="flex-1 p-3">
       <div class="my-5 ">
         <div class="flex justify-center">
@@ -369,15 +344,7 @@ const enterMemoPin = () => {
           </div>
           <Pin />
         </div>
-        <div class="flex justify-center mt-5">
-          <textarea variant="outlined" placeholder="投稿文を入力してください" class="pr-0 border-2 border-solid border-gray-300 w-96" v-model="chatContent"></textarea>
-          <div class="mt-2 ml-5">
-            <button class="ml-5 py-2 px-3 bg-gray-500 rounded text-white hover:bg-blue-500 shadow-lg transition-all hover:shadow-lg hover:shadow-blue-500/25" @click="onMemo">メモ</button>
-          </div>
-        </div>
-        <div class="flex justify-center mt-5">
-          <textarea v-if="editAreaFlag" variant="outlined" placeholder="編集文を入力してください" rows="4" class="pr-0 border-2 border-solid border-gray-300 w-96" v-model="editContent"></textarea>
-        </div>
+        <Btn />
       </div>
     </div>
   </div>

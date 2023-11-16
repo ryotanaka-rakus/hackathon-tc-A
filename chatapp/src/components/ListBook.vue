@@ -303,6 +303,7 @@ const registerSocketEvent = () => {
 </script>
 
 <template>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <div class="mt-5 ml-5">
     <!-- ブックマーク一覧 -->
     <h4>ブックマーク一覧</h4>

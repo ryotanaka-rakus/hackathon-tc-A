@@ -331,6 +331,7 @@ const enterMemoPin = () => {
 </script>
 
 <template>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <div class="mt-5" v-if="memoList.length !== 0">
     <h4>メモ</h4>
     <div id="commentSection" class="max-w-lg max-h-[524px] overflow-y-auto border p-3" ref="commentSectionRef">

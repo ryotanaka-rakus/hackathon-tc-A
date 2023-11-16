@@ -331,6 +331,7 @@ const enterMemoPin = () => {
 </script>
 
 <template>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <div class="mt-5 ml-5">
     <h4>ピン留めメッセージ一覧</h4>
     <div id="commentSection" class="max-w-xs overflow-y-auto border p-3 max-h-[524px]" ref="commentSectionRef">
