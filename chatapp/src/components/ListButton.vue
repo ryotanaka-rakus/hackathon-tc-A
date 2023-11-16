@@ -8,6 +8,7 @@ import Memo from './ListMemo.vue'
 import Book from './ListBook.vue'
 import Pin from './ListPin.vue'
 
+
 // #region global state
 const userName = inject("userName")
 // 仮のuserId, roomId。Login.vueから渡す必要がある。
@@ -368,13 +369,16 @@ const enterMemoPin = () => {
         <div class="flex justify-center">
           <div>
             <Chat />
+            <Memo />
           </div>
           <Book />
+          <Pin />
         </div>
         <div class="flex justify-center mt-5">
           <textarea variant="outlined" placeholder="投稿文を入力してください" class="pr-0 border-2 border-solid border-gray-300 w-96" v-model="chatContent"></textarea>
           <div class="mt-2 ml-5">
-            <button class="ml-5 py-2 px-3 bg-gray-500 rounded text-white hover:bg-blue-500 shadow-lg transition-all hover:shadow-lg hover:shadow-blue-500/25" @click="onPublish">投稿</button>
+            <button class="py-2 px-3 bg-gray-500 rounded text-white hover:bg-blue-500 shadow-lg transition-all hover:shadow-lg hover:shadow-blue-500/25" @click="onPublish">投稿</button>
+            <button class="ml-5 py-2 px-3 bg-gray-500 rounded text-white hover:bg-blue-500 shadow-lg transition-all hover:shadow-lg hover:shadow-blue-500/25" @click="onMemo">メモ</button>
           </div>
         </div>
         <div class="flex justify-center mt-5">
@@ -384,12 +388,3 @@ const enterMemoPin = () => {
     </div>
   </div>
 </template>
-
-<style scoped>
-
-.message-timestamp {
-  font-size: 0.8em;
-  color: #777;
-  margin-left: 10px;
-}
-</style>

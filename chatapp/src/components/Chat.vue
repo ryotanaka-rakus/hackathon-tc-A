@@ -3,7 +3,10 @@ import { inject, ref, reactive, onMounted } from "vue"
 import socketManager from '../socketManager.js'
 import 'tailwindcss/tailwind.css'
 import { useRouter } from "vue-router";
-import Book from './Book.vue'
+import Chat from './ListChat.vue'
+import Memo from './ListMemo.vue'
+import Book from './ListBook.vue'
+import Pin from './ListPin.vue'
 
 
 // #region global state
@@ -365,75 +368,11 @@ const enterMemoPin = () => {
       <div class="my-5 ">
         <div class="flex justify-center">
           <div>
-            <div class="mt-5" v-if="chatList.length !== 0">
-              <h4>チャット</h4>
-              <div id="commentSection" class="max-w-lg max-h-60 overflow-y-auto border p-3" ref="commentSectionRef">
-                <ul>
-                  <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">
-                    <div v-if="userList.find((user) => user.id == chat.senderId)">
-                      {{ userList.find((user) => user.id == chat.senderId).name + "さん: " + chat.content}}
-                      <span class="message-timestamp">{{ formatTimestamp(chat.createdAt) }}</span>
-                      <!-- ブックマークボタン -->
-                      <button class="ml-2 py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded" @click="saveBookmark(chat.id)">ブックマーク</button>
-                      <button class="ml-3 py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded" @click="pinMessage(chat.id)">ピン留め</button>
-                      <!-- 「編集」, 「編集完了」, 「編集履歴」　ボタンを追加 -->
-                      <br>
-                      <button v-if="chat.senderId == userId" @click="showEditTextarea()" class="ml-3 py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded">編集</button>
-                      <button v-if="chat.senderId == userId" v-bind:value="chat.id" @click="onEdit(chat.id)" class="ml-3 py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded">編集完了</button>
-                      <button v-bind:value="chat.id" @click="editHistoryVisibility(chat.id)" class="ml-3 py-0.5 px-0.5 border-solid border-2 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded">編集履歴</button>
-                    </div>
-                    <!-- 編集履歴を表示 -->
-                    <div v-if="historyFlag[chat.id]">
-                      <div class="item mt-4" v-for="(edit, j) in editList.filter((el) => el[0] && el[0].messageId == chat.id)" :key="j">
-                        <li class="item mt-4" v-for="(e, k) in edit" :key="k">
-                          {{"編集履歴" + (k+1) + ':' + e.previousContent }}
-                          <span class="message-timestamp">
-                            {{ formatTimestamp(e.createdAt) }} 
-                          </span>
-                        </li>
-                      </div>
-                    </div>
-                  </li>
-                </ul>
-                <!-- メッセージを編集する際に使用するテキストエリアを追加 -->
-                <textarea v-if="editAreaFlag" variant="outlined" placeholder="編集文を入力してください" rows="4" class="area" v-model="editContent"></textarea>
-               </div>
-            </div>
-            <div class="mt-5" v-if="memoList.length !== 0">
-              <h4>メモ</h4>
-              <div id="commentSection" class="max-w-lg max-h-60 overflow-y-auto border p-3" ref="commentSectionRef">
-                <ul>
-                  <li class="item mt-4" v-for="(memo, i) in memoList" :key="i">{{ memo.content }}</li>
-                </ul>
-              </div>
-            </div>
+            <Chat />
+            <Memo />
           </div>
-          <!-- <div class="mt-5 ml-5"> -->
-            <!-- ブックマーク一覧 -->
-            <!-- <h4>ブックマーク一覧</h4>
-            <div id="commentSection" class="max-w-xs overflow-y-auto border p-3 max-h-[524px]" ref="commentSectionRef">
-              <ul>
-                <li v-for="bookmark in bookmarkList" :key="bookmark.id">
-                  <div v-if="chatList.find((chat) => chat.id == bookmark.messageId)">
-                    {{ userList.find((user) => user.id == bookmark.userId).name + "さん: " + chatList.filter((chat) => chat.id == bookmark.messageId)[0].content }}
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div> -->
           <Book />
-          <div class="mt-5 ml-5">
-            <h4>ピン留めメッセージ一覧</h4>
-            <div id="commentSection" class="max-w-xs overflow-y-auto border p-3 max-h-[524px]" ref="commentSectionRef">
-              <ul>
-                <li v-for="msg in pinMessageList" :key="msg.id">
-                  <div v-if="chatList.find((chat) => chat.id == msg.messageId)">
-                    {{ userList.filter((user) => user.id == chatList.find((chat) => chat.id == msg.id).senderId)[0].name + "さん: " + chatList.filter((chat) => chat.id == msg.messageId)[0].content }}
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
+          <Pin />
         </div>
         <div class="flex justify-center mt-5">
           <textarea variant="outlined" placeholder="投稿文を入力してください" class="pr-0 border-2 border-solid border-gray-300 w-96" v-model="chatContent"></textarea>

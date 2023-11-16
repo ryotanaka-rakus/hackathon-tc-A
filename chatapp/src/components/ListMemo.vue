@@ -299,20 +299,43 @@ const registerSocketEvent = () => {
   });
 };
 
+const formatTimestamp = (timestamp) => {
+  timestamp = new Date(timestamp);
+  return timestamp.toLocaleString();
+}
+
+const enterPostBook = () => {
+  if (router) {
+    router.push({ name: 'postbook' });
+  }
+}
+
+const enterPostPin = () => {
+  if (router) {
+    router.push({ name: 'postpin' });
+  }
+}
+
+const enterMemoBook = () => {
+  if (router) {
+    router.push({ name: 'memobook' });
+  }
+}
+
+const enterMemoPin = () => {
+  if (router) {
+    router.push({ name: 'memopin' });
+  }
+}
 
 </script>
 
 <template>
-  <!-- <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"> -->
-  <div class="mt-5 ml-5">
-    <!-- ブックマーク一覧 -->
-    <h4>ブックマーク一覧</h4>
-    <div id="commentSection" class="max-w-xs overflow-y-auto border p-3 max-h-[524px]" ref="commentSectionRef">
+  <div class="mt-5" v-if="memoList.length !== 0">
+    <h4>メモ</h4>
+    <div id="commentSection" class="max-w-lg max-h-60 overflow-y-auto border p-3" ref="commentSectionRef">
       <ul>
-        <li v-for="bookmark in bookmarkList" :key="bookmark.id">
-          <div v-if="chatList.find((chat) => chat.id == bookmark.messageId)">{{ userList.find((user) => user.id == bookmark.userId).name + "さん: " + chatList.filter((chat) => chat.id == bookmark.messageId)[0].content }}
-          </div>
-        </li>
+        <li class="item mt-4" v-for="(memo, i) in memoList" :key="i">{{ memo.content }}</li>
       </ul>
     </div>
   </div>

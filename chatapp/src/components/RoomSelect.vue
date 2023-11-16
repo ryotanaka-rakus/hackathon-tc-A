@@ -58,9 +58,9 @@ const enterRoom = (roomid) => {
   <div class="flex justify-center mt-20">
     <h1 class="text-gray-600 font-bold text-4xl mt-15">ルームを選択してください</h1>
   </div>
-  <div>
+  <div class="flex justify-center mt-20">
     <!-- ルーム情報をタイル状に表示 -->
-    <div v-for="(room, index) in roomList" :key="index" class="mt-20 flex justify-between flex-col items-center">
+    <div v-for="(room, index) in roomList" :key="index" class="mx-4 items-center">
       <!-- ボタン要素としてラップ -->
       <button @click="enterRoom(index + 1)" class="py-3 px-4 bg-blue-500 rounded text-white hover:bg-blue-700 shadow-lg transition-all hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:ring focus:border-blue-300">{{ room.name }}</button>
     </div>

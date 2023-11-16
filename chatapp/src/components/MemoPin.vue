@@ -3,7 +3,10 @@ import { inject, ref, reactive, onMounted } from "vue"
 import socketManager from '../socketManager.js'
 import 'tailwindcss/tailwind.css'
 import { useRouter } from "vue-router";
-
+import Chat from './ListChat.vue'
+import Memo from './ListMemo.vue'
+import Book from './ListBook.vue'
+import Pin from './ListPin.vue'
 
 // #region global state
 const userName = inject("userName")
@@ -364,27 +367,9 @@ const enterMemoPin = () => {
       <div class="my-5 ">
         <div class="flex justify-center">
           <div>
-            <div class="mt-5" v-if="memoList.length !== 0">
-              <h4>メモ</h4>
-              <div id="commentSection" class="max-w-lg max-h-60 overflow-y-auto border p-3" ref="commentSectionRef">
-                <ul>
-                  <li class="item mt-4" v-for="(memo, i) in memoList" :key="i">{{ memo.content }}</li>
-                </ul>
-              </div>
-            </div>
+            <Memo />
           </div>
-          <div class="mt-5 ml-5">
-            <h4>ピン留めメッセージ一覧</h4>
-            <div id="commentSection" class="max-w-xs overflow-y-auto border p-3 max-h-[524px]" ref="commentSectionRef">
-              <ul>
-                <li v-for="msg in pinMessageList" :key="msg.id">
-                  <div v-if="chatList.find((chat) => chat.id == msg.messageId)">
-                    {{ userList.filter((user) => user.id == chatList.find((chat) => chat.id == msg.id).senderId)[0].name + "さん: " + chatList.filter((chat) => chat.id == msg.messageId)[0].content }}
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
+          <Pin />
         </div>
         <div class="flex justify-center mt-5">
           <textarea variant="outlined" placeholder="投稿文を入力してください" class="pr-0 border-2 border-solid border-gray-300 w-96" v-model="chatContent"></textarea>
