@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, provide, ref } from "vue"
+import { computed, provide, ref } from "vue"
 import { useRouter } from "vue-router";
 
 // #region reactive state
@@ -24,12 +24,9 @@ const enterChat = () => {
 <template>
   <header>
     <div class="border-b-2 border-gray-500 flex flex-row items-center justify-between">
-      <h1 class="text-blue-700 font-bold text-3xl mb-2" @click="enterChat">ChatApp</h1>
+      <h1 class="text-blue-700 font-bold text-3xl mb-2" @click="enterChat">ChatPack</h1>
       <div class="max-w-3xl text-2xl"><p v-if="isUserName && $route.path !== '/'">ユーザー名：{{ userName }}</p></div>
     </div>
   </header>
   <router-view />
 </template>
-
-<style scoped>
-</style>

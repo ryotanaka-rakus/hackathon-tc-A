@@ -358,8 +358,10 @@ const enterMemoPin = () => {
           </div>
         </li>
       </ul>
+    </div>
+    <div class="mt-5 flex justify-center">
       <!-- メッセージを編集する際に使用するテキストエリアを追加 -->
-      <textarea v-if="editAreaFlag" variant="outlined" placeholder="編集文を入力してください" rows="4" class="area" v-model="editContent"></textarea>
+      <textarea v-if="editAreaFlag" variant="outlined" placeholder="編集文を入力してください" rows="4" class="pr-0 border-2 border-solid border-gray-300 w-96" v-model="editContent"></textarea>
     </div>
   </div>
 </template>
