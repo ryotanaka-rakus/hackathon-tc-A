@@ -333,7 +333,7 @@ const enterMemoPin = () => {
 <template>
   <div class="mt-5" v-if="memoList.length !== 0">
     <h4>メモ</h4>
-    <div id="commentSection" class="max-w-lg max-h-60 overflow-y-auto border p-3" ref="commentSectionRef">
+    <div id="commentSection" class="max-w-lg max-h-[524px] overflow-y-auto border p-3" ref="commentSectionRef">
       <ul>
         <li class="item mt-4" v-for="(memo, i) in memoList" :key="i">{{ memo.content }}</li>
       </ul>

@@ -3,10 +3,8 @@ import { inject, ref, reactive, onMounted } from "vue"
 import socketManager from '../socketManager.js'
 import 'tailwindcss/tailwind.css'
 import { useRouter } from "vue-router";
-import Chat from './ListChat.vue'
 import Memo from './ListMemo.vue'
 import Book from './ListBook.vue'
-import Pin from './ListPin.vue'
 
 // #region global state
 const userName = inject("userName")

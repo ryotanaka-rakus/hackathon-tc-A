@@ -333,7 +333,7 @@ const enterMemoPin = () => {
 <template>
   <div class="mt-5" v-if="chatList.length !== 0">
     <h4>チャット</h4>
-    <div id="commentSection" class="max-w-lg max-h-60 overflow-y-auto border p-3" ref="commentSectionRef">
+    <div id="commentSection" class="max-w-lg max-h-[524px] overflow-y-auto border p-3" ref="commentSectionRef">
       <ul>
         <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">
           <div v-if="userList.find((user) => user.id == chat.senderId)">{{ userList.find((user) => user.id == chat.senderId).name + "さん: " + chat.content}}
